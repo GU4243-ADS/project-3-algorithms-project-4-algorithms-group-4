@@ -14,11 +14,11 @@
 
 
 setwd("/Users/Nicole/Documents/GitHub/project-3-algorithms-project-4-algorithms-group-4/doc")
-source("../libs/functions.R")
+source("../lib/functions.R")
 
 
 # Load the data
-MS_train <- read.csv("data_train.csv", as.is = TRUE, header = TRUE)
+MS_train <- read.csv("../data/MS_sample/data_train.csv", as.is = TRUE, header = TRUE)
 MS_train <- MS_train[, 2:4]
 
 
@@ -27,7 +27,7 @@ MS_train <- MS_train[, 2:4]
 
 # Below takes 2.17 minutes
 MS_UI <- MS_data_transform(MS_train)
-save(MS_UI, file = "MS_UI.RData")
+save(MS_UI, file = "../data/MS_UI.RData")
 
 
 # Matrix Calculations
@@ -63,7 +63,7 @@ all(vec == rowSums(MS_UI, na.rm = TRUE))
 setwd("/Users/cynthiarush/Dropbox/ADS_Spring_2018/Project3/Proj3_Data/eachmovie_sample")
 
 # Load the data
-movie_train <- read.csv("data_train.csv", as.is = TRUE, header = TRUE)
+movie_train <- read.csv("../data/eachmovie_sample/data_train.csv", as.is = TRUE, header = TRUE)
 movie_train <- movie_train[, 2:4]
 
 # How we might fill in the user-item matrix using %in%
@@ -109,7 +109,7 @@ all(UI[1, ] == UI[2,], na.rm = TRUE)
 # Below takes about 4 minutes
 
 movie_UI <- movie_data_transform(movie_train)
-save(movie_UI, file = "movie_UI.RData")
+save(movie_UI, file = "../data/movie_UI.RData")
 
 # Some calculations
 total_ratings <- rowSums(movie_UI, na.rm = TRUE)
