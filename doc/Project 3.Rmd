@@ -31,11 +31,6 @@ total_ratings <- rowSums(movie_UI, na.rm = TRUE)
 ```
 
 
-```{r Calculating Predictions for Users}
-load(file ="../data/MS_pred.RData")
-load(file = "../data/movie_pred.RData")
-```
-
 ```{r Simularity Weights of the Users}
 # Pearson correlations
 load(file = "../data/MS_sim.RData")
@@ -49,8 +44,14 @@ load(file = "../data/movie_sim.RData")
 
 # Mean-square difference
 
-#SimRank
+# SimRank
 
+```
+
+```{r Calculating Predictions for Users}
+# From Pearson Simularity Weights
+load(file ="../data/MS_pred.RData")
+load(file = "../data/movie_pred.RData")
 ```
 
 Group 4:
@@ -62,6 +63,6 @@ Explore: Will prediction accuracy improve if we select the best neighbors of the
 
 
 ```{r Model-Based Algorithm}
-
+library(EMCluster)
 ```
 
