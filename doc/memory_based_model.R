@@ -172,7 +172,7 @@ save(movie_sim, file = "movie_sim.RData")
 # The below took 30 minutes on my Macbook and 14 on my iMac
 
 MS_sim <- calc_weight(MS_UI)
-save(MS_sim, file = "MS_sim.RData")
+save(MS_sim, file = "../data/MS_sim.RData")
 
 
 
