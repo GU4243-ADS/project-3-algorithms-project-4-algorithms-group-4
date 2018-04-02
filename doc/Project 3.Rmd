@@ -63,9 +63,15 @@ Explore: Will prediction accuracy improve if we select the best neighbors of the
 
 
 ```{r Model-Based Algorithm}
-train_func <= function(movie_UI, C = ){
-  
+train_func <= function(data, C = 1, tau = 0.05, iter = 100){ # function arguments include data, number of cluster, tau (threshold for termination when values converge), and number of iterations
+  # using tau = 0.05 from previous year's code but no particular understanding
+  data <- movie_UI[1:500, ] # subset for speed (until finished)
+  C <- 12 # Half of the movie genres according to IMDB
   # Step 1 - Initialization 
+  
+  # Step 2 - Expectation
+  
+  # Step 3 - Maximization
   
 }
 
