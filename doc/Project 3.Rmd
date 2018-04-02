@@ -19,6 +19,53 @@ load(file = "../data/movie_UI.RData")
 ```{r Matrix Calculations}
 visit_nums <- rowSums(MS_UI, na.rm = TRUE)
 
+# table(visit_nums)
+# mean(visit_nums)
+# median(visit_nums)
+
 total_ratings <- rowSums(movie_UI, na.rm = TRUE)
+
+# table(total_ratings)
+# mean(total_ratings)
+# median(total_ratings)
+```
+
+```{r Simularity Weights of the Users}
+# Pearson correlations
+load(file = "../data/MS_sim.RData")
+load(file = "../data/movie_sim.RData")
+
+# Spearman correlations
+
+# Vector similarity (Cosine)
+
+# Entropy-based
+
+# Mean-square difference
+
+#SimRank
+
+```
+
+Group 4:
+- After calculating similarity weights, we select which other users' data are used in computing the predictions (currently, all of them).
+- There is evidence that selecting a subset of users improves accuracy. 
+- Moreover, when there are millions of users, using them all is infeasible. 
+
+Explore: Will prediction accuracy improve if we select the best neighbors of the active user to use in calculating predictions?
+
+
+Assume each user belongs to one of C different classes or groups. Denote the class of user \textit{i} by $G_i$.
+
+Collaborative filtering is estimating the expected value of a vote or rating, given what we know about the user. 
+Let \textit{a} be the active user and movie $m \notin I(a)$. 
+\[\hat{r}_{a,m} = E(R_{a,m}|r_{a,j}, j \in I(a)) = \sum_{k = 1}^5 k * P(R_{a,m} = k|r_{a,j}, j \in I(a)) \] 
+
+We need to estimate $P(R_{a,m} = k|r_{a,j}, j \in I(a))$ for each \textit{k}, which is the probability that use \texit{a} gives movie \textit{m} a \textit{k} rating, given user \textit{a}'s other movie rating. 
+
+
+
+```{r Model-Based Algorithm}
+
 ```
 
