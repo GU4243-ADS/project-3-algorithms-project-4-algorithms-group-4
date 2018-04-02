@@ -1,0 +1,24 @@
+---
+title: "Collaborative Filtering"
+author: "Nicole Smith"
+date: "4/2/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+setwd("/Users/Nicole/Documents/GitHub/project-3-algorithms-project-4-algorithms-group-4/doc")
+
+load(file = "../data/MS_UI.RData")
+load(file = "../data/movie_UI.RData")
+```
+
+```{r Matrix Calculations}
+visit_nums <- rowSums(MS_UI, na.rm = TRUE)
+
+total_ratings <- rowSums(movie_UI, na.rm = TRUE)
+```
+
