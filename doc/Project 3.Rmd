@@ -62,14 +62,22 @@ Group 4:
 Explore: Will prediction accuracy improve if we select the best neighbors of the active user to use in calculating predictions?
 
 
+#Model-based Algorithm
 ```{r Model-Based Algorithm}
-train_func <= function(data, C = 1, tau = 0.05, iter = 100){ # function arguments include data, number of cluster, tau (threshold for termination when values converge), and number of iterations
+
+mov.train <- movie_UI
+
+EM_func <= function(data, C = 1, tau = 0.05, iter = 100){ 
+  # function arguments include data, number of clusters, tau (threshold for termination when values converge), and number of iterations
   # using tau = 0.05 from previous year's code but no particular understanding
-  data <- movie_UI[1:500, ] # subset for speed (until finished)
-  C <- 12 # Half of the movie genres according to IMDB
+ 
+  
+  #data <- movie_UI[1:500, ] # subset for speed (until finished)
+  #C <- 12 # Half of the movie genres according to IMDB
   # Step 1 - Initialization 
   
   # Step 2 - Expectation
+  
   
   # Step 3 - Maximization
   
@@ -77,6 +85,8 @@ train_func <= function(data, C = 1, tau = 0.05, iter = 100){ # function argument
 
 
 ```
+
+
 Model-based recommendation intermediate steps:
 -(E-step) Write code to give cluster assignment probabilities to user, a matrix where cols are clusters and rows are users. output = assignment probability matrix.
 -(M- Step) Write code to re-estimate mu and gamma vectors from each users cluster assignment probabilities. There are $k*C*j$ gamma values which can be put into a 3d array or a series of matrices. Output = recalculated mu and gamma (matrix).
