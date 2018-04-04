@@ -85,10 +85,13 @@ EM_func <= function(data, C = 1, tau = 0.05, iter = 100){
   
   gamma <- array(0, dim = c(nrow(data), k, C))
   
-  # Step 2 - Expectation
+  #### Step 2 - Expectation ####
   
   
-  # Step 3 - Maximization
+  
+  
+  
+  #### Step 3 - Maximization ####
   
 }
 
