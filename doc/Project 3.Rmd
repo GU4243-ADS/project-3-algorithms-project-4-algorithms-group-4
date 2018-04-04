@@ -69,30 +69,41 @@ mov.train <- movie_UI # to clarify that this is training data
 
 EM_func <= function(data, C = 1, tau = 0.05, iter = 100){ 
   # function arguments include:
-    #data: user-item matrix
-    #C: number of clusters
-    #tau: threshold for termination when values converge, using tau = 0.05 from previous year's code but no particular understanding
-    #iter: maximum number of iterations
+      #data: user-item matrix
+      #C: number of clusters
+      #tau: threshold for termination when values converge, using tau = 0.05 from previous year's code but no particular understanding
+      #iter: maximum number of iterations
  # function output = ???
   
   #### Step 1 - Initialization ####
+ 
   #data <- mov.train[1:500, ] # subset for speed (until finished)
   #C <- 12 # Half of the movie genres according to IMDB
   
   k = 6 # number of ratings
+  users <- rownames(mov.train)
+  items <- colnames(mov.train) # used items as a generic for both movies and vroots
   
   mu <- vector(mode = "double", length = C)
   
-  gamma <- array(0, dim = c(nrow(data), k, C))
+  gamma <- array(0, dim = c(length(users), k, C))
+  
+  cluster.prob <- matrix(0, nrow = length(users), ncol = C) # cluster assignment matrix
   
   #### Step 2 - Expectation ####
   
   
   
-  
+
   
   #### Step 3 - Maximization ####
+
   
+
+  
+  
+  
+    
 }
 
 
