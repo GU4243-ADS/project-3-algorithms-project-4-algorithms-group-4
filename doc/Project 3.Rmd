@@ -65,16 +65,25 @@ Explore: Will prediction accuracy improve if we select the best neighbors of the
 #Model-based Algorithm
 ```{r Model-Based Algorithm}
 
-mov.train <- movie_UI
+mov.train <- movie_UI # to clarify that this is training data
 
 EM_func <= function(data, C = 1, tau = 0.05, iter = 100){ 
-  # function arguments include data, number of clusters, tau (threshold for termination when values converge), and number of iterations
-  # using tau = 0.05 from previous year's code but no particular understanding
- 
+  # function arguments include:
+    #data: user-item matrix
+    #C: number of clusters
+    #tau: threshold for termination when values converge, using tau = 0.05 from previous year's code but no particular understanding
+    #iter: maximum number of iterations
+ # function output = ???
   
-  #data <- movie_UI[1:500, ] # subset for speed (until finished)
+  #### Step 1 - Initialization ####
+  #data <- mov.train[1:500, ] # subset for speed (until finished)
   #C <- 12 # Half of the movie genres according to IMDB
-  # Step 1 - Initialization 
+  
+  k = 6 # number of ratings
+  
+  mu <- vector(mode = "double", length = C)
+  
+  gamma <- array(0, dim = c(nrow(data), k, C))
   
   # Step 2 - Expectation
   
