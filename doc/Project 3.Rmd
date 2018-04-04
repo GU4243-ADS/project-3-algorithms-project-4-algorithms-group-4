@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 setwd("/Users/Nicole/Documents/GitHub/project-3-algorithms-project-4-algorithms-group-4/doc")
+setwd("/Users/admin/Desktop/Columbia/Spring 2018/Applied DS/GitHub/project-3-algorithms-project-4-algorithms-group-4/doc")
 
 load(file = "../data/MS_UI.RData")
 load(file = "../data/movie_UI.RData")
@@ -88,7 +89,7 @@ EM_func <= function(data, C = 1, tau = 0.05, iter = 100){
   
   gamma <- array(0, dim = c(length(users), k, C))
   
-  cluster.prob <- matrix(0, nrow = length(users), ncol = C) # cluster assignment matrix
+  cluster.probs <- matrix(0, nrow = length(users), ncol = C) # cluster assignment matrix
   
   #### Step 2 - Expectation ####
   
@@ -98,6 +99,10 @@ EM_func <= function(data, C = 1, tau = 0.05, iter = 100){
   
   #### Step 3 - Maximization ####
 
+  # use the %in% func to create the matrix I want to operate on
+  test <- matrix
+  
+  mu <-   apply(cluster.probs, 2, sum)      /length(users)
   
 
   
