@@ -161,7 +161,7 @@ EM_func <= function(data, C = 1, tau = 0.05, iter = 100){
 Model-based recommendation intermediate steps:
 -(E-step) Write code to give cluster assignment probabilities to user, a matrix where cols are clusters and rows are users. output = assignment probability matrix.
 -(M- Step) Write code to re-estimate mu and gamma vectors from each users cluster assignment probabilities. There are $k*C*j$ gamma values which can be put into a 3d array or a series of matrices. Output = recalculated mu and gamma (matrix).
-- Write code to iterate of the the two steps and to set when to stop iteration(consider iteration back stop number), and set up initial $\mu_c$ and $\gamma$ values.
+- Write code to (a) iterate over the the two steps, (b) to set when to stop iteration(consider iteration back stop number), (c) set up initial $\mu_c$ and $\gamma_{j,C,k}$ and other values, and (d) make "hard" cluster assignments from the "soft" assignments of the final iteration of EM.
 -Write code to calculate expected active user rating from EM parameters. Output = function with input of data and # of classes and output of predicted rating on movie m for active user.
 -Write CV code to determine best test error on predictions at different numbers of classes for the EM/predictor model. Include code to calculate test error (shared with memory-based team). Output = optimal number of classes. 
 -Re calibrate for microsoft data.
