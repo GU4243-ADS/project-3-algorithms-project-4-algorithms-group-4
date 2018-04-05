@@ -68,7 +68,7 @@ Explore: Will prediction accuracy improve if we select the best neighbors of the
 
 mov.train <- movie_UI # to clarify that this is training data
 
-EM_func <= function(data, C = 1, tau = 0.01, iter = 100){ 
+EM_func <= function(data, C = 1, tau = 0.01, ITER = 100){ 
   # function arguments include:
       #data: user-item matrix
       #C: number of clusters
@@ -78,7 +78,7 @@ EM_func <= function(data, C = 1, tau = 0.01, iter = 100){
   
   # terminate when if iter = 10000 or if $\sum{c = 1}^C \abs{\hat{\mu_c^{t+1}} - \hat{\mu_c^{t}}}^2$ where |x| is the l-2 norm. 
   #### Step 1 - Initial Conditions ####
- 
+  iter <- 1
   data <- mov.train[1:500, ] # subset for speed (until finished)
   C <- 12 # Half of the movie genres according to IMDB
   
@@ -94,7 +94,7 @@ EM_func <= function(data, C = 1, tau = 0.01, iter = 100){
 
   
   #### Step 2 - Expectation ####
-  
+  while{is.conv > tau | iter < ITER}
   
   
 
@@ -152,8 +152,7 @@ EM_func <= function(data, C = 1, tau = 0.01, iter = 100){
     (3) 3d by 3d matrix mult (not really possible in R)
   
   
-  
-  
+  iter = iter + 1
     
 }
 
