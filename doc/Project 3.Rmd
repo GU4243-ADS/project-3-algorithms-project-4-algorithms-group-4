@@ -93,11 +93,10 @@ EM_func <= function(data, C = 1, tau = 0.01, ITER = 100){
   
   #### Step 2 - Expectation 
   while(is.conv > tau | iter < ITER){
-    max.lik <- log(gamma)
+    max.lik <- log(gamma) #???
     phi <- exp(data %*% t(max.lik)) * mu
     cluster.probs <- matrix(rep(1/rowSums(phi), C), length(users), C) * phi
   
-    }
   #### Step 3 - Maximization 
   #set.seed(123)
   #test <- matrix(sample(20, 24, replace = TRUE), nrow = 4, ncol = 6)
@@ -151,10 +150,8 @@ EM_func <= function(data, C = 1, tau = 0.01, ITER = 100){
   #  (3) 3d by 3d matrix mult (not really possible in R)
   
   # convergence using l-2 norm 
-  is.conv <- norm(mu_hat - mu_pre)
-  print(is.conv)
-  print(iter)
-  
+  is.conv <- norm(mu_hat - mu_pre, type = "O")
+
   mu_pre <- mu_hat
   iter = iter + 1
   }
@@ -162,9 +159,9 @@ EM_func <= function(data, C = 1, tau = 0.01, ITER = 100){
   return(list("clusters" = cluster.probs, "gamma" = gamma, "mu" = mu))
 }
 
-
 ```
 
+https://d1b10bmlvqabco.cloudfront.net/attach/ja4fumjiqyo475/isgbsiqhYqF/jfmthrwhv767/HW5_sol.pdf
 
 Model-based recommendation intermediate steps:
 -(E-step) Write code to give cluster assignment probabilities to user, a matrix where cols are clusters and rows are users. output = assignment probability matrix.
@@ -188,4 +185,11 @@ Notes on EM:
 Notes to make predictions from EM: 
 - After the termination of the EM algorithm, give a hard assignment of clusters (EM algorithm only gives soft assignment so use the highest probability that a user falls within a specific cluster to create hard assignment)
 - For each movie-cluster pair, you have a multinomial distribution (this is $\gamma$); use this probability distribution to calculate the rating that each user \textit{a} gave to movie \textit{m} within each cluster \textit{c}. 
-- All of the users within each cluster have the same rating probability. 
+- All of the users within each cluster have the same rating probability.
+
+```{r}
+# Predictions
+
+hard.cluster <- apply(cluster.probs, 1, which.max)
+```
+
