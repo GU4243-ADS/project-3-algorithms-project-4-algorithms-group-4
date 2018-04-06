@@ -62,9 +62,9 @@ Group 4:
 
 Explore: Will prediction accuracy improve if we select the best neighbors of the active user to use in calculating predictions?
 
-#Model-based Algorithm
+# Model-based Algorithm
 ```{r Model-Based Algorithm}
-
+library(matrixStats)
 mov.train <- movie_UI # to clarify that this is training data
 
 EM_func <= function(data, C = 1, tau = 0.01, ITER = 100){ 
@@ -89,13 +89,20 @@ EM_func <= function(data, C = 1, tau = 0.01, ITER = 100){
   gamma <- array(0, dim = c(length(items), C, k)) # dims = items(movies), clusters, ratings
   
   cluster.probs <- matrix(NA, nrow = length(users), ncol = C) # cluster assignment matrix 
+  
+  init <- sample(1:users, C)
 
   
   #### Step 2 - Expectation 
   while(is.conv > tau | iter < ITER){
-    max.lik <- log(gamma) #???
-    phi <- exp(data %*% t(max.lik)) * mu
-    cluster.probs <- matrix(rep(1/rowSums(phi), C), length(users), C) * phi
+    L <- log(1/6) # means of rankings -- 1/6? 
+    gamma <- exp(data %*% t(L)) * mu
+    cluster.probs <- matrix(rep(1/rowSums(gamma), C), length(users), C) * gamma
+    
+    # in the numerator we multiply all gamma[c,j,k] for a given class c, all movies j that have been rated by the active user, k being the rating that the active user actually gave to this movie ? And in the denominator sum all such products for all classes ?
+    
+    # logSumExp(vector of probabilities?) -- the step where a_ic = max c
+    # The usual way to handle this is to work with log-probabilities instead of probabilities. This allows us to handle very small numbers without problem. When applying logs to the formula, the only difficulty is then dealing with the denominator that contains a sum.
   
   #### Step 3 - Maximization 
   #set.seed(123)
@@ -150,7 +157,7 @@ EM_func <= function(data, C = 1, tau = 0.01, ITER = 100){
   #  (3) 3d by 3d matrix mult (not really possible in R)
   
   # convergence using l-2 norm 
-  is.conv <- norm(mu_hat - mu_pre, type = "O")
+  is.conv <- norm(mu_hat - mu_pre, type = "O") # measure of the change in cluster assignments
 
   mu_pre <- mu_hat
   iter = iter + 1
@@ -162,6 +169,10 @@ EM_func <= function(data, C = 1, tau = 0.01, ITER = 100){
 ```
 
 https://d1b10bmlvqabco.cloudfront.net/attach/ja4fumjiqyo475/isgbsiqhYqF/jfmthrwhv767/HW5_sol.pdf
+
+
+Try simplifying the sum and exponential to see that it is the same equation as in the last two slides. It is easy to run into underflow problem when dealing with these probabilities that are very small. You can see the answers in @104 to see how to deal with it (the usual strategy is to use log-probabilities instead).
+
 
 Model-based recommendation intermediate steps:
 -(E-step) Write code to give cluster assignment probabilities to user, a matrix where cols are clusters and rows are users. output = assignment probability matrix.
@@ -190,6 +201,6 @@ Notes to make predictions from EM:
 ```{r}
 # Predictions
 
-hard.cluster <- apply(cluster.probs, 1, which.max)
+hard.cluster <- apply(cluster.probs, 1, which.max) # hard cluster assignments
 ```
 
