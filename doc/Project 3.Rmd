@@ -152,7 +152,7 @@ EM_train <= function(data, k, C = 5, tau = 0.01, ITER = 100){
   ### Hard Assignment
   hard.assignments <- (aic == rowMins(aic)) + 0
   #hard.cluster <- apply(aic, 1, which.max) # hard cluster assignments
-  return(list("hard assignments" = hard.assignments, "gamma" = gamma, "mu" = mu))
+  return(list("hard.assignments" = hard.assignments, "gamma" = gamma, "mu" = mu))
 }
 
 ```
