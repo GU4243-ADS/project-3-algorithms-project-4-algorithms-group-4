@@ -80,14 +80,16 @@ EM_func <= function(data, C = 5, tau = 0.01, ITER = 100){
   
   mu <- rep(1/C, C) 
   
-  gamma <- array(1/6, dim = c(length(data), C, k)) # dims = items(movies), clusters, ratings
+  gamma <- array(1/k, dim = c(ncol(data), C, k)) # dims = items(movies), clusters, ratings
   
   cluster.probs <- matrix(NA, nrow = length(data), ncol = C) # cluster assignment matrix 
 
   gamma.norm <- gamma/mean(gamma)
   
-  #### Step 2 - Expectation 
-  while(is.conv > tau | iter < ITER){
+   
+  while(is.conv > tau | iter < ITER) {
+   
+  #### Step 2 - Expectation
     
     e.step1 <- log(mu) + log(gamma) # numerator of aic using log probabilities
     e.step2 <- logSumExp(mu * gamma) # normalizing 
