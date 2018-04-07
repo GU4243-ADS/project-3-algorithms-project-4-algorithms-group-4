@@ -63,6 +63,8 @@ Group 4:
 Explore: Will prediction accuracy improve if we select the best neighbors of the active user to use in calculating predictions?
 
 # Model-based Algorithm
+E-step math: $aic := log(\hat{\mu}) + \sum log(\gamma) - log(\sum e^{log (\mu) + \sum log (\gamma)})$
+
 
 ```{r Model-Based Algorithm}
 library(matrixStats)
@@ -141,7 +143,7 @@ EM_train <= function(data, k, C = 5, tau = 0.01, ITER = 100){
   
   
   #### Convergence Conditions using l-2 norm 
-  is.conv <- norm(aic - aic_pre, type = "O") # measure of the change in cluster assignments
+  is.conv <- norm(aic - aic_pre, type = "2") # measure of the change in cluster assignments
 
   aic_pre <- aic
   iter = iter + 1
@@ -161,6 +163,20 @@ EM_train <= function(data, k, C = 5, tau = 0.01, ITER = 100){
 ### Inputs:
 # active.users = the test data user-item matrix
 # hard.assignments = the hard.assignments output from the EM_train func
+
+predict <-function(UI_matrix, j, aic, gamma){
+  n_users <- nrow(UI_matrix)
+  
+  predict_rank <- matrix(0, nrow = n_users)
+  for (j in 1:n_items){ 
+    for (k in 1:6){
+      predict_rank <- predict_rank + k * aic %*% gamma[, j]
+    }
+  }
+  return(predict_rank)
+}
+
+# not sure if this function will actually work, but I think the math is pretty close to what we need. Feel free to change it in any way; this was just my first attempt. 
 
 
 bayesian_predict <- function(hard.assignments, active.users) {
