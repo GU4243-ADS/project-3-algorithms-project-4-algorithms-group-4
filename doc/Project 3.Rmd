@@ -67,13 +67,7 @@ Explore: Will prediction accuracy improve if we select the best neighbors of the
 library(matrixStats)
 mov.train <- movie_UI # to clarify that this is training data
 
-EM_func <= function(data, C = 1, tau = 0.01, ITER = 100){ 
-  # function arguments include:
-      #data: user-item matrix
-      #C: number of clusters
-      #tau: threshold for termination when values converge
-      #iter: maximum number of iterations
- # function output = ???
+EM_func <= function(data, C = 5, tau = 0.01, ITER = 100){ 
   
   #### Step 1 - Initial Conditions 
   iter <- 1
@@ -86,18 +80,19 @@ EM_func <= function(data, C = 1, tau = 0.01, ITER = 100){
   
   mu <- rep(1/C, C) 
   
-  gamma <- array(0, dim = c(length(items), C, k)) # dims = items(movies), clusters, ratings
+  gamma <- array(1/6, dim = c(length(data), C, k)) # dims = items(movies), clusters, ratings
   
-  cluster.probs <- matrix(NA, nrow = length(users), ncol = C) # cluster assignment matrix 
-  
-  init <- sample(1:users, C)
+  cluster.probs <- matrix(NA, nrow = length(data), ncol = C) # cluster assignment matrix 
 
+  gamma.norm <- gamma/mean(gamma)
   
   #### Step 2 - Expectation 
   while(is.conv > tau | iter < ITER){
-    L <- log(1/6) # means of rankings -- 1/6? 
-    gamma <- exp(data %*% t(L)) * mu
-    cluster.probs <- matrix(rep(1/rowSums(gamma), C), length(users), C) * gamma
+    
+    e.step1 <- log(mu) + log(gamma) # numerator of aic using log probabilities
+    e.step2 <- logSumExp(mu * gamma) # normalizing 
+    aic <- e.step1 - e.step2
+    
     
     # in the numerator we multiply all gamma[c,j,k] for a given class c, all movies j that have been rated by the active user, k being the rating that the active user actually gave to this movie ? And in the denominator sum all such products for all classes ?
     
@@ -148,6 +143,12 @@ EM_func <= function(data, C = 1, tau = 0.01, ITER = 100){
   
   # !! check gamma is correct by making sure that sum over all k's of gamma_j,c = 1
   
+  for (i in 1:k){}
+    gamma.numer[, , ] <- t(aic) %*% (movie == k)
+    gamma.denom[, , ] <- colSums(gamma.numer)
+
+    gamma.parameter <- gamma.numer/gamma.denom
+  }
 
 
 
@@ -157,9 +158,9 @@ EM_func <= function(data, C = 1, tau = 0.01, ITER = 100){
   #  (3) 3d by 3d matrix mult (not really possible in R)
   
   # convergence using l-2 norm 
-  is.conv <- norm(mu_hat - mu_pre, type = "O") # measure of the change in cluster assignments
+  is.conv <- norm(aic - aic_pre, type = "O") # measure of the change in cluster assignments
 
-  mu_pre <- mu_hat
+  aic_pre <- aic
   iter = iter + 1
   }
   
@@ -200,7 +201,6 @@ Notes to make predictions from EM:
 
 ```{r}
 # Predictions
-
-hard.cluster <- apply(cluster.probs, 1, which.max) # hard cluster assignments
+hard.cluster <- apply(aic, 1, which.max) # hard cluster assignments
 ```
 
