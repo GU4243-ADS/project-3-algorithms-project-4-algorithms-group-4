@@ -63,6 +63,7 @@ Group 4:
 Explore: Will prediction accuracy improve if we select the best neighbors of the active user to use in calculating predictions?
 
 # Model-based Algorithm
+
 ```{r Model-Based Algorithm}
 library(matrixStats)
 
@@ -70,12 +71,13 @@ mov.train <- movie_UI # to clarify that this is training data, Note: the unrated
 
 
 
-EM_func <= function(data, C = 5, tau = 0.01, ITER = 100){ 
+EM_train <= function(data, k, C = 5, tau = 0.01, ITER = 100){ 
   
   #### Step 1 - Initial Conditions 
   
   data <- mov.train[1:500, ] # subset for speed (until finished)
-  data[which(is.na(data))] <- 0 # Note: length(which(rowSums(data) == 0)) is 0 which means ther is extension on at least 1 dimension for each user, i.e. every user rated at least 1 movie
+  data[which(is.na(data))] <- 0 #sets any NAs to 0s
+  # Note: length(which(rowSums(data) == 0)) is 0 which means ther is extension on at least 1 dimension for each user, i.e. every user rated at least 1 movie
   C <- 12 # Half of the movie genres according to IMDB
   k = 6 # number of ratings
   users <- rownames(data)
@@ -138,21 +140,35 @@ EM_func <= function(data, C = 5, tau = 0.01, ITER = 100){
 #rowSums(aperm(new, c(1, 3, 2))[,,1]) # this sums over k's for each movie. The sums should equal 1. They do!!!  but I have some NaNs which are introduced when I divide the numerator by the denominator. ... what to do... logs...? just set them to 0?? 
   
   
-  #### convergence using l-2 norm 
+  #### Convergence Conditions using l-2 norm 
   is.conv <- norm(aic - aic_pre, type = "O") # measure of the change in cluster assignments
 
   aic_pre <- aic
   iter = iter + 1
   }
   
-  return(list("soft assignments" = aic, "gamma" = gamma, "mu" = mu))
+  ### Hard Assignment
+  hard.assignments <- (aic == rowMins(aic)) + 0
+  #hard.cluster <- apply(aic, 1, which.max) # hard cluster assignments
+  return(list("hard assignments" = hard.assignments, "gamma" = gamma, "mu" = mu))
 }
 
 ```
 
 ```{r}
-# Predictions
-hard.cluster <- apply(aic, 1, which.max) # hard cluster assignments
+
+###########
+### Inputs:
+# active.users = the test data user-item matrix
+# hard.assignments = the hard.assignments output from the EM_train func
+
+
+bayesian_predict <- function(hard.assignments, active.users) {
+  
+  
+}
+
+
 ```
 
 
