@@ -73,11 +73,11 @@ mov.train <- movie_UI # to clarify that this is training data, Note: the unrated
 EM_func <= function(data, C = 5, tau = 0.01, ITER = 100){ 
   
   #### Step 1 - Initial Conditions 
-  set.seed(123)
-  #data <- mov.train[1:500, ] # subset for speed (until finished)
+  
+  data <- mov.train[1:500, ] # subset for speed (until finished)
   data[which(is.na(data))] <- 0 # Note: length(which(rowSums(data) == 0)) is 0 which means ther is extension on at least 1 dimension for each user, i.e. every user rated at least 1 movie
-  #C <- 12 # Half of the movie genres according to IMDB
-  #k = 6 # number of ratings
+  C <- 12 # Half of the movie genres according to IMDB
+  k = 6 # number of ratings
   users <- rownames(data)
   items <- colnames(data) # used items as a generic for both movies and vroots
   mu <- rep(1/C, C) 
@@ -103,11 +103,11 @@ EM_func <= function(data, C = 5, tau = 0.01, ITER = 100){
   #### Step 3 - Maximization 
  
   ## Estimate Mu 
-  mu <- apply(aic, 2, sum)/length(users) # dims = 1 x clusters
+  mu <- apply(aic, 2, sum)/length(users) # vector of cluster shares/probabilities
   
   ## Estimate Gamma
   
-  gamma <- function(k=1) { # this is func is just diagnostic for the moment
+  #gamma <- function() { # this is func is just diagnostic while I am still coding
   
   indicator.numer <- array(0, dim = c(length(users),length(items), k))
   indicator.denom <- matrix(0, nrow = length(users), ncol = length(items))
@@ -124,22 +124,40 @@ EM_func <= function(data, C = 5, tau = 0.01, ITER = 100){
   numer <- apply(indicator.numer, 3, function(x) x%*%aic) # each element of resulting array represents the sum of the class C aic wieghts of every user who rated that jth movie with that rating k. apply() outputs matrix with weird dims = (length(seq_along(\the result of the func on each sheet\)), number of sheets in third margin)
   numerator <- array(numer, c(length(items), C, k)) # puts data in the correct shape. dims = (movies, clusters, ratings) 
   
-  #denominator <- indicator.denom %*% aic # dims = movies, clusters, ratings 
   
-  indicator.denom[which(data != 0)] <- 1
-  indicator.denom <- t(indicator.denom) # dims = movies, users  
-  #denominator is common across ratings k, but not across clusters
-  demoninator <- indicator.denom %*% aic # dims = movies, clusters
-  #demoninator <- apply(indicator.denom, 3, function(x) x%*%aic)
+  indicator.denom[which(data != 0)] <- 1 # indicator array to identify each instance in which user i rated movie j with any rating
+  indicator.denom <- t(indicator.denom) # dims = movies, users. 
+  denominator <- indicator.denom%*%aic # each element of the resulting matrix represents the sum of the class C aic weights of every user who rated movie j with any rating. dims = (movies, clusters). Note: denominator is common across ratings k, but not across clusters, there for the following code would be unecessary: denominator <- apply(indicator.denom, 3, function(x) x%*%aic)
   
-  #result <- nominator/demoninator # dims = movies, clusters, ratings
-  result <- apply(numerator, 3, function(x) x/demoninator)
-  result <- array(result, c(length(items), C, k)) # dims = movies, clusters, ratings
-  result
-} # end of the diagnostic func
-system.time(new <- gamma(k=3))
+  #result <- nominator/denominator # dims = movies, clusters, ratings
+  result <- apply(numerator, 3, function(x) x/denominator) # divides each numerator element by its respective denominator value. apply() returns a weirdly shaped matrix again.
+  gamma <- array(result, c(length(items), C, k)) # puts data in the correct shape. dims = (movies, clusters, ratings)
+  #gamma
+#} # end of the diagnostic func
+#system.time(new <- gamma())
+#rowSums(aperm(new, c(1, 3, 2))[,,1]) # this sums over k's for each movie. The sums should equal 1. They do!!!  but I have some NaNs which are introduced when I divide the numerator by the denominator. ... what to do... logs...? just set them to 0?? 
   
-  # !! check gamma is correct by making sure that sum over all k's of gamma_j,c = 1
+  
+  #### convergence using l-2 norm 
+  is.conv <- norm(aic - aic_pre, type = "O") # measure of the change in cluster assignments
+
+  aic_pre <- aic
+  iter = iter + 1
+  }
+  
+  return(list("soft assignments" = aic, "gamma" = gamma, "mu" = mu))
+}
+
+```
+
+```{r}
+# Predictions
+hard.cluster <- apply(aic, 1, which.max) # hard cluster assignments
+```
+
+
+```{r}
+###### What is this?? it looks like a much more efficient M-step :).. It is kind of genius in its efficiency.. I tried to limit what was inside the for loop but this is elegant because correctly identifies that what makes the code slow is the number of iterations more than the amount of code within the iterations so it puts steps thing in the loop I left out of it.
   
   for (i in 1:k){}
     gamma.numer[, , ] <- t(aic) %*% (movie == k)
@@ -147,25 +165,10 @@ system.time(new <- gamma(k=3))
 
     gamma.parameter <- gamma.numer/gamma.denom
   }
-
-
-
-  #Other approaches: 
-  #  (1)j_k in users for all j
-  #  (2) lapply concatatnating gamma_{j,1:k} cols
-  #  (3) 3d by 3d matrix mult (not really possible in R)
-  
-  # convergence using l-2 norm 
-  is.conv <- norm(aic - aic_pre, type = "O") # measure of the change in cluster assignments
-
-  aic_pre <- aic
-  iter = iter + 1
-  }
-  
-  return(list("clusters" = aic, "gamma" = gamma, "mu" = mu))
-}
-
 ```
+
+
+
 
 https://d1b10bmlvqabco.cloudfront.net/attach/ja4fumjiqyo475/isgbsiqhYqF/jfmthrwhv767/HW5_sol.pdf
 
@@ -196,9 +199,4 @@ Notes to make predictions from EM:
 - After the termination of the EM algorithm, give a hard assignment of clusters (EM algorithm only gives soft assignment so use the highest probability that a user falls within a specific cluster to create hard assignment)
 - For each movie-cluster pair, you have a multinomial distribution (this is $\gamma$); use this probability distribution to calculate the rating that each user \textit{a} gave to movie \textit{m} within each cluster \textit{c}. 
 - All of the users within each cluster have the same rating probability.
-
-```{r}
-# Predictions
-hard.cluster <- apply(aic, 1, which.max) # hard cluster assignments
-```
 
