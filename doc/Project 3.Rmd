@@ -107,23 +107,26 @@ EM_func <= function(data, C = 5, tau = 0.01, ITER = 100){
   
   ## Estimate Gamma
   
-  #gamma <- function(k=1) { # this is func is just diagnostic for the moment
+  gamma <- function(k=1) { # this is func is just diagnostic for the moment
   
   indicator.numer <- array(0, dim = c(length(users),length(items), k))
   indicator.denom <- matrix(0, nrow = length(users), ncol = length(items))
-    for (i in 1:k) #can this be done with an apply appoach? yes, apply and margin = 3? but how to use apply with multiple funcs and subsetting, maybe define a func like below?
+    
+  for (i in 1:k) 
+    # can this be done with an apply appoach? yes, apply and margin = 3? but how to use apply with multiple funcs and subsetting, maybe define a func like below?
     {
-      indicator.numer[,,i][which(mov.train == i)] <- 1 
+      indicator.numer[,,i][which(data == i)] <- 1 # indicator array to identify each instance in which user i rated movie j with rating k
     }
-  indicator.numer <- aperm(indicator.numer, c(2,1,3)) 
+  indicator.numer <- aperm(indicator.numer, c(2,1,3)) # transposing so that the matrix is conformable to aic. new dims = (movies/items, users, ratings)
   # would transposing each sheet in the for loop be faster?
-   
-  numer <- apply(indicator.numer, 3, function(x) x%*%aic)
-  numerator <- array(numer, c(length(items), C, k)) # dims = movies, clusters, ratings
   # maybe faster to transpose aic rather than aperm indicator.nomin
-  #nominator <- indicator.nomin %*% aic # dims = movies, clusters, ratings 
+   
+  numer <- apply(indicator.numer, 3, function(x) x%*%aic) # each element of resulting array represents the sum of the class C aic wieghts of every user who rated that jth movie with that rating k. apply() outputs matrix with weird dims = (length(seq_along(\the result of the func on each sheet\)), number of sheets in third margin)
+  numerator <- array(numer, c(length(items), C, k)) # puts data in the correct shape. dims = (movies, clusters, ratings) 
   
-  indicator.denom[which(!is.na(mov.train))] <- 1
+  #denominator <- indicator.denom %*% aic # dims = movies, clusters, ratings 
+  
+  indicator.denom[which(data != 0)] <- 1
   indicator.denom <- t(indicator.denom) # dims = movies, users  
   #denominator is common across ratings k, but not across clusters
   demoninator <- indicator.denom %*% aic # dims = movies, clusters
@@ -132,9 +135,9 @@ EM_func <= function(data, C = 5, tau = 0.01, ITER = 100){
   #result <- nominator/demoninator # dims = movies, clusters, ratings
   result <- apply(numerator, 3, function(x) x/demoninator)
   result <- array(result, c(length(items), C, k)) # dims = movies, clusters, ratings
-  str(result)
-#} # end of the diagnostic func
-system.time(gamma())
+  result
+} # end of the diagnostic func
+system.time(new <- gamma(k=3))
   
   # !! check gamma is correct by making sure that sum over all k's of gamma_j,c = 1
   
