@@ -85,8 +85,8 @@ EM_train <= function(data, k, C = 5, tau = 0.01, ITER = 100){
   users <- rownames(data)
   items <- colnames(data) # used items as a generic for both movies and vroots
   mu <- rep(1/C, C) 
-  gamma <- array(1/k, dim = c(length(items), C, k)) # dims = items(movies), clusters, ratings
-  aic <- matrix(1/C, nrow = length(users), ncol = C) # cluster assignment/probability matrix, dims = users, clusters
+  gamma <- array(1/k, dim = c(items, C, k)) # dims = items(movies), clusters, ratings
+  aic <- matrix(NA, nrow = users, ncol = C) # cluster assignment/probability matrix, dims = users, clusters
   gamma.norm <- gamma/mean(gamma)
   
   iter <- 1
@@ -95,9 +95,11 @@ EM_train <= function(data, k, C = 5, tau = 0.01, ITER = 100){
   #### Step 2 - Expectation
     
     e.step1 <- log(mu) + log(gamma) # numerator of aic using log probabilities
-    e.step2 <- logSumExp(mu * gamma) # normalizing 
+    for (j in 1:length(items)){
+      
+    e.step2 <- logSumExp(log(mu) + log(gamma.sum)) # normalizing 
     aic <- e.step1 - e.step2 
-    
+    }
     
     # in the numerator we multiply all gamma[c,j,k] for a given class c, all movies j that have been rated by the active user, k being the rating that the active user actually gave to this movie ? And in the denominator sum all such products for all classes ?
     
