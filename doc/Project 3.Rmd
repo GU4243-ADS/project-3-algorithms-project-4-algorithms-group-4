@@ -65,6 +65,7 @@ Explore: Will prediction accuracy improve if we select the best neighbors of the
 # Model-based Algorithm
 E-step math: $aic := log(\hat{\mu}) + \sum log(\gamma) - log(\sum e^{log (\mu) + \sum log (\gamma)})$
 
+### EM train algo
 
 ```{r Model-Based Algorithm}
 library(matrixStats)
@@ -159,6 +160,7 @@ EM_train <= function(data, k, C = 5, tau = 0.01, ITER = 100){
 
 ```
 
+### Predict function
 ```{r}
 
 ###########
@@ -191,6 +193,7 @@ bayesian_predict <- function(hard.assignments, active.users) {
 
 
 ```{r}
+### Alternate M-step
 ###### What is this?? it looks like a much more efficient M-step :).. It is kind of genius in its efficiency.. I tried to limit what was inside the for loop but this is elegant because correctly identifies that what makes the code slow is the number of iterations more than the amount of code within the iterations so it puts steps thing in the loop I left out of it.
   
   for (i in 1:k){}
