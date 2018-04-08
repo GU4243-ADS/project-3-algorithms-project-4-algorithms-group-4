@@ -82,11 +82,14 @@ EM_train <= function(data, k, C = 5, tau = 0.01, ITER = 100){
   # Note: length(which(rowSums(data) == 0)) is 0 which means ther is extension on at least 1 dimension for each user, i.e. every user rated at least 1 movie
   C <- 12 # Half of the movie genres according to IMDB
   k = 6 # number of ratings
+  n_users <- dim(data)[1]
+  n_items <- dim(data)[2]
+  
   users <- rownames(data)
   items <- colnames(data) # used items as a generic for both movies and vroots
   mu <- rep(1/C, C) 
-  gamma <- array(1/k, dim = c(items, C, k)) # dims = items(movies), clusters, ratings
-  aic <- matrix(NA, nrow = users, ncol = C) # cluster assignment/probability matrix, dims = users, clusters
+  gamma <- array(1/k, dim = c(n_items, C, k)) # dims = items(movies), clusters, ratings
+  aic <- matrix(1/6, nrow = n_users, ncol = C) # cluster assignment/probability matrix, dims = users, clusters
   gamma.norm <- gamma/mean(gamma)
   
   iter <- 1
@@ -95,7 +98,11 @@ EM_train <= function(data, k, C = 5, tau = 0.01, ITER = 100){
   #### Step 2 - Expectation
     
     e.step1 <- log(mu) + log(gamma) # numerator of aic using log probabilities
-    for (j in 1:length(items)){
+    for (i in 1:k) {
+      log(data + gamma )
+      gamma.sum <- apply(gamma, MARGIN = c(items), sum)
+    }
+    
       
     e.step2 <- logSumExp(log(mu) + log(gamma.sum)) # normalizing 
     aic <- e.step1 - e.step2 
@@ -143,6 +150,7 @@ EM_train <= function(data, k, C = 5, tau = 0.01, ITER = 100){
 #system.time(new <- gamma())
 #rowSums(aperm(new, c(1, 3, 2))[,,1]) # this sums over k's for each movie. The sums should equal 1. They do!!!  but I have some NaNs which are introduced when I divide the numerator by the denominator. ... what to do... logs...? just set them to 0?? 
   
+  # FIX NaNs: log the numerator and the denominator then subtract. 
   
   #### Convergence Conditions using l-2 norm 
   is.conv <- norm(aic - aic_pre, type = "2") # measure of the change in cluster assignments
@@ -166,34 +174,35 @@ EM_train <= function(data, k, C = 5, tau = 0.01, ITER = 100){
 # active.users = the test data user-item matrix
 # hard.assignments = the hard.assignments output from the EM_train func
 
-predict <-function(UI_matrix, j, aic, gamma){
-  n_users <- nrow(UI_matrix)
+bayesian_predict <-function(data, j,  aic, gamma){
+  n_users <- dim(data)[1]
+
   
   predict_rank <- matrix(0, nrow = n_users)
-  for (j in 1:n_items){ 
     for (k in 1:6){
-      predict_rank <- predict_rank + k * aic %*% gamma[, j]
+      predict_rank <- predict_rank + k * aic %*% gamma[, j, k] # non-conformable arguments... 
     }
   }
-  return(predict_rank)
-}
-
-# not sure if this function will actually work, but I think the math is pretty close to what we need. Feel free to change it in any way; this was just my first attempt. 
 
 
-bayesian_predict <- function(hard.assignments, active.users) {
+n_items <- dim(data)[2]
   
-  
-}
-
-
+for (j in 1:n_items) {
+data[, j] <- bayesian_predict(data, j, aic, gamma)}
 ```
 
+Notes to make predictions from EM: 
+- After the termination of the EM algorithm, give a hard assignment of clusters (EM algorithm only gives soft assignment so use the highest probability that a user falls within a specific cluster to create hard assignment)
+- For each movie-cluster pair, you have a multinomial distribution (this is $\gamma$); use this probability distribution to calculate the rating that each user \textit{a} gave to movie \textit{m} within each cluster \textit{c}. 
+- All of the users within each cluster have the same rating probability.
+
+Predict rank function: 
+\[r_{a, m} = \sum_{k=1}^6 k \frac{\sum_{c=1}^C \mu_c \gamma_{m,c}^k \prod_{j\in I(a)} \gamma_{j,c}^{r_{a,j}}}{\sum_{c=1}^C \mu_c \prod_{j\in I(a)} \gamma_{j,c}^{r_{a,j}}}\]
 
 ```{r}
 ###### What is this?? it looks like a much more efficient M-step :).. It is kind of genius in its efficiency.. I tried to limit what was inside the for loop but this is elegant because correctly identifies that what makes the code slow is the number of iterations more than the amount of code within the iterations so it puts steps thing in the loop I left out of it.
   
-  for (i in 1:k){}
+  for (i in 1:k){
     gamma.numer[, , ] <- t(aic) %*% (movie == k)
     gamma.denom[, , ] <- colSums(gamma.numer)
 
@@ -202,9 +211,6 @@ bayesian_predict <- function(hard.assignments, active.users) {
 ```
 
 
-
-
-https://d1b10bmlvqabco.cloudfront.net/attach/ja4fumjiqyo475/isgbsiqhYqF/jfmthrwhv767/HW5_sol.pdf
 
 
 Try simplifying the sum and exponential to see that it is the same equation as in the last two slides. It is easy to run into underflow problem when dealing with these probabilities that are very small. You can see the answers in @104 to see how to deal with it (the usual strategy is to use log-probabilities instead).
@@ -228,9 +234,4 @@ Notes on EM:
 - Use cross-validation to find optimal number of clusters (if computationally taxing, then use a k-fold CV where k = 1)
 - Terminate when if iter = 10000 or if $\sum_{c = 1}^C |{\hat{\mu}_c^{t+1} - \hat{\mu}_c^{t}}|^2$ where |x| is the l-2 norm. 
 - Can do random initializations and find log-likelihood but not necessary
-
-Notes to make predictions from EM: 
-- After the termination of the EM algorithm, give a hard assignment of clusters (EM algorithm only gives soft assignment so use the highest probability that a user falls within a specific cluster to create hard assignment)
-- For each movie-cluster pair, you have a multinomial distribution (this is $\gamma$); use this probability distribution to calculate the rating that each user \textit{a} gave to movie \textit{m} within each cluster \textit{c}. 
-- All of the users within each cluster have the same rating probability.
 
