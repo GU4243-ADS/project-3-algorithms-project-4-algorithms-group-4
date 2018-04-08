@@ -87,8 +87,8 @@ EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){
   items <- colnames(data) # used items as a generic for both movies and vroots
   mu <- rep(1/C, C) # vector length C
   gamma <- array(1/6, dim = c(k, n_items, C)) # dims = ratings, items(movies), clusters
+  gamma <- gamma/mean(gamma)
   aic <- matrix(1/C, nrow = n_users, ncol = C) # cluster assignment/probability matrix, dims = users, clusters
-  #gamma.norm <- gamma/mean(gamma)
   iter <- 1
   
   while(is.conv > tau | iter < ITER) {
