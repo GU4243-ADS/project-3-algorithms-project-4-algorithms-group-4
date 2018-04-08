@@ -42,26 +42,64 @@ Movie_train <- movie_UI
 ```
 
 #### Vector similarity
+```{r}
+
+```
+
 
 #### Entropy
+```{r}
+
+```
+
 
 #### Mean-Square Difference
+```{r}
+
+```
+
 
 #### SimRank
+```{r}
+
+```
+
 
 ## Task: Group 4 Specific Assignment - Neighbors 
+```{r}
+
+```
 
 
 
 ## Task: Model Based Collaborative Filtering
 
 ### Step 1: Build EM algorithm 
+```{r}
+## Initialize parameters
+
+
+## E-step
+
+
+## M-step
+```
 
 
 ### Step 2: Cross validation to choose the best number of clusters
+```{r}
+
+```
 
 
 ### Step 3: Predict ratings
+```{r}
+
+```
 
 
 ### Step 4: Calculate test error
+```{r}
+
+```
+

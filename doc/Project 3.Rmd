@@ -274,23 +274,23 @@ The E-step computation is slightly more tricky, as we are not using all the gamm
 
 ```{r}
 mov.train <- movie_UI # to clarify that this is training data, Note: the unrated user-movie combos are NA's
-data <- mov.train[1:500, ] # subset for speed (until finished)
+data <- movie_UI # subset for speed (until finished)
 
 EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){ 
   
   ############## Step 1 - Initial Conditions and Set up ####################
   
-  data[which(is.na(data))] <- 0 #sets any NAs to 0s
+  #data[which(is.na(data))] <- 0 #sets any NAs to 0s
   # Note: length(which(rowSums(data) == 0)) is 0 which means ther is extension on at least 1 dimension for each user, i.e. every user rated at least 1 movie
   C <- 12 # Half of the movie genres according to IMDB
   k = 6 # number of ratings
   n.users <- dim(data)[1]
   n.items <- dim(data)[2]
   
-  users <- rownames(data)
-  items <- colnames(data) # used items as a generic for both movies and vroots
+  #users <- rownames(data)
+  #items <- colnames(data) # used items as a generic for both movies and vroots
   mu <- rep(1/C, C) # vector length C
-   gamma <- array(1/6, dim = c(k, n_items, C)) # dims = ratings, items(movies), clusters
+  gamma <- array(1/6, dim = c(k, n.items, C)) # dims = ratings, items(movies), clusters
   #aic <- matrix(1/6, nrow = n_users, ncol = C) # cluster assignment/probability matrix, dims = users, clusters
   #gamma.norm <- gamma/mean(gamma)
   iter <- 1
@@ -303,12 +303,12 @@ EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){
     
     ## Expectation Step
     for(i in 1:n.users){
-      items <-  which(!is.na(mov.train[i, ]))# items that user i ranked/visited
-      rank <- na.omit(mov.train[i, ]) # specific rankings of items 
+      items <-  which(!is.na(data[i, ]))# items that user i ranked/visited
+      rank <- na.omit(data[i, ]) # specific rankings of items 
     
       for(c in 1:C) {      
-        for(k in 1:length(items)){ 
-          aic.numer[i, c] <- mu[c]*gamma[rank[[k]], items[[k]], c]
+        for(x in 1:length(items)){ 
+          aic.numer[i, c] <- mu[c]*gamma[rank[[x]], items[[x]], c]
           
         }
       }
@@ -320,14 +320,14 @@ EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){
     ## M-step 
     
      ## Estimate Mu 
-  mu <- apply(aic, 2, sum)/length(users) # vector of cluster shares/probabilities
+  mu <- apply(aic, 2, sum)/n.users # vector of cluster shares/probabilities
   
   ## Estimate Gamma
   
   #gamma <- function() { # this is func is just diagnostic while I am still coding
   
-  indicator.numer <- array(0, dim = c(length(users),length(items), k))
-  indicator.denom <- matrix(0, nrow = length(users), ncol = length(items))
+  indicator.numer <- array(0, dim = c(n.users, n.items, k))
+  indicator.denom <- matrix(0, nrow = n.users, ncol = n.items)
     
   for (i in 1:k) 
     # can this be done with an apply appoach? yes, apply and margin = 3? but how to use apply with multiple funcs and subsetting, maybe define a func like below?
@@ -339,7 +339,7 @@ EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){
   # maybe faster to transpose aic rather than aperm indicator.nomin
    
   numer <- apply(indicator.numer, 3, function(x) x%*%aic) # each element of resulting array represents the sum of the class C aic wieghts of every user who rated that jth movie with that rating k. apply() outputs matrix with weird dims = (length(seq_along(\the result of the func on each sheet\)), number of sheets in third margin)
-  numerator <- array(numer, c(length(items), C, k)) # puts data in the correct shape. dims = (movies, clusters, ratings) 
+  numerator <- array(numer, c(n.items, C, k)) # puts data in the correct shape. dims = (movies, clusters, ratings) 
   
   
   indicator.denom[which(data != 0)] <- 1 # indicator array to identify each instance in which user i rated movie j with any rating
@@ -348,7 +348,7 @@ EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){
   
   #result <- nominator/denominator # dims = movies, clusters, ratings
   result <- apply(numerator, 3, function(x) x/denominator) # divides each numerator element by its respective denominator value. apply() returns a weirdly shaped matrix again.
-  gamma <- array(result, c(length(items), C, k)) # puts data in the correct shape. dims = (movies, clusters, ratings)
+  gamma <- array(result, c(n.items, C, k)) # puts data in the correct shape. dims = (movies, clusters, ratings)
   #gamma
 #} # end of the diagnostic func
 #system.time(new <- gamma())
@@ -388,22 +388,6 @@ Notes on EM:
 - Terminate when if iter = 10000 or if $\sum_{c = 1}^C |{\hat{\mu}_c^{t+1} - \hat{\mu}_c^{t}}|^2$ where |x| is the l-2 norm. 
 - Can do random initializations and find log-likelihood but not necessary
 
-
-In case neighbors isn't done... 
-```{r}
-selectNeighborWeights <- function(df, weights, n){
-  users <- rownames(df)
-  m <- length(users)
-  neighbors <- matrix(rep(NA, m * n), m, n)
-  neighors <- data.frame(neighbors)
-  rownames(neighbors) <- users
-  
-  for (i in 1:m){
-    neighbors[i, ] <- colnames(weights)[order(weights[i, ], decreasing=TRUE)][1:n]
-  }
-  return (neighbors)
-}
-```
 
 
 
