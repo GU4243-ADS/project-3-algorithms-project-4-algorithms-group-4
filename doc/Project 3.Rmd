@@ -72,11 +72,9 @@ library(matrixStats)
 
 mov.train <- movie_UI # to clarify that this is training data, Note: the unrated user-movie combos are NA's
 
-
-
-EM_train <= function(data, k, C = 5, tau = 0.01, ITER = 100){ 
+EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){ 
   
-  #### Step 1 - Initial Conditions 
+  ############## Step 1 - Initial Conditions and Set up ####################
   
   data <- mov.train[1:500, ] # subset for speed (until finished)
   data[which(is.na(data))] <- 0 #sets any NAs to 0s
@@ -96,33 +94,32 @@ EM_train <= function(data, k, C = 5, tau = 0.01, ITER = 100){
   
   while(is.conv > tau | iter < ITER) {
    
-  #### Step 2 - Expectation
+  ######################### Step 2 - Expectation ####################
     
 
     pre_aic <- array(NA, c(k, length(users), C))
+    gamma <- aperm(gamma, c(3, 1, 2)) # change dims to dims = (ratings, movies, clusters)
+    gamma <- log(gamma) # logs gamma so we can use log sums instead of products
     for (i in 1:k) {
-      
-      gamma <- aperm(gamma, c(3, 1, 2)) # change dims to dims = (ratings, movies, clusters)
-      gamma <- log(gamma) # logs gamma so we can use log sums instead of products
-      
       temp <- apply(gamma, 3, function(x) x%*%t(data == i)) # each element of the kth row of resulting array represents the log sum (i.e. product) of movie-rating=i pairs of user i given class C. apply() outputs matrix with weird dims = (length(seq_along(\the result of the func on each sheet\)), number of sheets in third margin)
       temp <- array(temp, c(k, length(users), C)) # puts data in the correct shape. dims = (ratings, users, clusters)
       
-      pre_aic[i,,] <- temp[i,,] # extract only the row for which the log sums over the correct subset of gammas_(k=i, j, c) 
+      pre_aic[i,,] <- temp[i,,] # extract only the row for which the log sums over the correct subset of gammas_(k=i, j, c). dims = (ratings, users, clusters)
     }
     
     pre_aic <- t(colSums(pre_aic))  #  log sums over all ratings k the (previous) logsum of gammas of the j movies rated k=i, for each user i. dims = (C, i) # pre_aic is now the matrix of the part of the equation after the Pi in both the numerator and denominator for each C,i combination
     pre_aic <- exp(pre_aic) # returns our expression to the non-logged world
-  
-       #conclusion of above: basically took the logsum/product of all the movies rated 1 (then 2,...) for user i in cluster 1 wieghts, then log summed all those log sums over all ratings k for each user i
+    #conclusion of above: basically took the logsum/product of all the movies rated 1 (then 2,...) for user i in cluster 1 wieghts, then log summed all those log sums over all ratings k for each user i
     aic_numer <- mu * pre_aic # gives the numerator of aic. dims = (C, i) #I am assuming C clusters are still oriented 1:C in the same order in both mu and pre_aic
+    aic_numer <- t(aic_numer) # dims = (users, Clusters)
     
-    aic_denom <- colSums(aic_numer)  # every user gets the same denom over all the clusters (here, 1 cluster = 1 col). dims = vector length(users)
+    aic_denom <- rowSums(aic_numer)  # every user gets the same denom over all the clusters (here, 1 cluster = 1 col). dims = vector length(users)
     
-    aic <- t(aic_numer)/aic_denom # dims = (users, clusters)
+    #aic <- aic_numer/aic_denom
+    aic <- exp(log(aic_numer) - log(aic_denom)) # dims = (users, clusters) # NaNs introduced.... :(
     
    
-  #### Step 3 - Maximization 
+  ######################## Step 3 - Maximization #########################
  
   ## Estimate Mu 
   mu <- apply(aic, 2, sum)/length(users) # vector of cluster shares/probabilities
@@ -161,7 +158,7 @@ EM_train <= function(data, k, C = 5, tau = 0.01, ITER = 100){
   
   # FIX NaNs: log the numerator and the denominator then subtract. 
   
-  #### Convergence Conditions using l-2 norm 
+  ################# Step 4 - Convergence Conditions using l-2 norm ###############
   is.conv <- norm(aic - aic_pre, type = "2") # measure of the change in cluster assignments
 
   aic_pre <- aic
@@ -169,7 +166,7 @@ EM_train <= function(data, k, C = 5, tau = 0.01, ITER = 100){
   }
   
   ### Hard Assignment
-  hard.assignments <- (aic == rowMins(aic)) + 0
+  hard.assignments <- (aic == rowMaxs(aic)) + 0 # I used a function from "MatrixsStats" library
   #hard.cluster <- apply(aic, 1, which.max) # hard cluster assignments
   return(list("hard.assignments" = hard.assignments, "gamma" = gamma, "mu" = mu))
 }
