@@ -1,0 +1,67 @@
+---
+title: "Collaborative Filtering"
+author: "Group 4"
+date: "4/8/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Step 0: Load Data
+```{r}
+# setwd("/Users/Nicole/Documents/GitHub/project-3-algorithms-project-4-algorithms-group-4/doc")
+# Change working directory 
+
+load(file = "../data/MS_UI.RData")
+load(file = "../data/movie_UI.RData")
+```
+
+
+## Task: Memory Based Collaborative Filtering
+
+### Comparing different similarity weights
+#### Pearson correlation
+```{r}
+# Weights
+load(file = "../data/MS_sim.RData")
+load(file = "../data/movie_sim.RData")
+
+# Predictions
+load(file ="../data/MS_pred.RData")
+load(file = "../data/movie_pred.RData")
+```
+
+#### Spearman's correlation
+```{r}
+MS_train <- MS_UI
+Movie_train <- movie_UI 
+
+
+```
+
+#### Vector similarity
+
+#### Entropy
+
+#### Mean-Square Difference
+
+#### SimRank
+
+## Task: Group 4 Specific Assignment - Neighbors 
+
+
+
+## Task: Model Based Collaborative Filtering
+
+### Step 1: Build EM algorithm 
+
+
+### Step 2: Cross validation to choose the best number of clusters
+
+
+### Step 3: Predict ratings
+
+
+### Step 4: Calculate test error

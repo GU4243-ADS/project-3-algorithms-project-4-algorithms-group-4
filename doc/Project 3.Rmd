@@ -204,7 +204,9 @@ bayesian_predict <-function(data, j,  hard.assignments, gamma){
 n.items <- dim(mov.train)[2]
   
 for (j in 1:n.items) {
-mov.train.predict[, j] <- bayesian_predict(mov.train, j, hard.assignments, gamma)}
+mov.train[, j] <- bayesian_predict(mov.train, j, hard.assignments, gamma)
+}
+# says items are not of the same length -- confused mov.train[, j] has length 5055 and length(predict.rank) = 5055
 ```
 
 Notes to make predictions from EM: 
