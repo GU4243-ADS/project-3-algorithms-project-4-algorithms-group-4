@@ -221,14 +221,18 @@ Predict rank function:
 what.to.predict <- which(!is.na(movies_UI_test))
 
 (mse <- sum((predictions[what.to.predict] - movie_UI_test[what.to.predict])**2)/length(what.to.predict))
-(mae <- sum(abs(predictions[indices_to_predict] - movie_UI_test[what.to.predict]))/length(what.to.predict))
-
+(mae <- sum(abs(predictions[what.to.predict] - movie_UI_test[what.to.predict]))/length(what.to.predict))
 
 R2.numer <- 1 - sum((predictions[what.to.predict] - movies_UI_test[what.to.predict])**2)
 R2.denom <- sum((movies_UI_test[what.to.predict] - mean(movies_UI_test[what.to.predict]))**2)
 
 (R2 <- R2.numer/R2.denom)
 ```
+
+
+For individual scoring, we look at the average absolute deviation of the predicted vote to the actual vote on items the users in the test set have actually voted on. That is, if the number of predicted votes in the test set for the active case is ma, then the average absolute deviation for a user is: $S_a = \frac{1}{m_a} \sum_{j \in P_a} | p_{a,j} - v_{a,j}|$ where $p_{a,j}$ is the prediction and $v_{a,j} is the validation. 
+
+Furthermore, we make an estimate of how likely it is that the user will visit an item on a ranked list. We posit that each successive item in a list is less likely.to be viewed by the user with an exponential decay. Then the expected utility of a ranked list of items (sorted by index j in order of declining vaj) is: $R_a = \sum_{j} \frac{max(v_{a,j} - d, 0)}{2^{(j-1)/(\alpha - 1)}}$ where d is the neutral vote and $\alpha$ is the viewing halflife. The halflife is the number of the item on the list such that there is a 50-50 chance the user will review that item. For these experiments, we used a halflife of 5 items.
 
 
 ```{r}
