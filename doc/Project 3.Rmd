@@ -107,14 +107,6 @@ EM_train <= function(data, k, C = 5, tau = 0.01, ITER = 100){
       
       gamma <- aperm(gamma, c(3, 1, 2)) # change dims to dims = (ratings, movies, clusters)
       gamma <- log(gamma) # logs gamma so we can use log sums instead of products
-=======
-    e.step1 <- log(mu) + log(gamma) # numerator of aic using log probabilities
-    for (i in 1:k) {
-      log(data + gamma )
-      gamma.sum <- apply(gamma, MARGIN = c(items), sum)
-    }
-    
->>>>>>> 67f0c93f3ce2b1ce9dc2c1c83532fe8e1d577a1d
       
       temp <- apply(gamma, 3, function(x) x%*%t(data == i)) # each element of the kth row of resulting array represents the log sum (i.e. product) of movie-rating=i pairs of user i given class C. apply() outputs matrix with weird dims = (length(seq_along(\the result of the func on each sheet\)), number of sheets in third margin)
   temp <- array(temp, c(k, length(users), C)) # puts data in the correct shape. dims = (ratings, users, clusters)
