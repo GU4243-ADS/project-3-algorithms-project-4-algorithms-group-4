@@ -95,12 +95,43 @@ EM_train <= function(data, k, C = 5, tau = 0.01, ITER = 100){
    
   #### Step 2 - Expectation
     
-    e.step1 <- log(mu) + log(gamma) # numerator of aic using log probabilities
-    for (j in 1:length(items)){
+
+    
+    pre_aic <- array(NA, c(k, length(users), C))
+    for (i in 1:k) {
+     aperm(gamma, c(3, 1, 2)) t(data == i)
       
-    e.step2 <- logSumExp(log(mu) + log(gamma.sum)) # normalizing 
-    aic <- e.step1 - e.step2 
+      gamma <- aperm(gamma, c(3, 1, 2)) # change dims to dims = (ratings, movies, clusters)
+      gamma <- log(gamma) # logs gamma so we can use log sums instead of products
+      
+      temp <- apply(gamma, 3, function(x) x%*%t(data == i)) # each element of the kth row of resulting array represents the log sum (i.e. product) of movie-rating=i pairs of user i given class C. apply() outputs matrix with weird dims = (length(seq_along(\the result of the func on each sheet\)), number of sheets in third margin)
+  temp <- array(temp, c(k, length(users), C)) # puts data in the correct shape. dims = (ratings, users, clusters)
+  
+  pre_aic[i,,] <- temp[i,,] # extract only the row for which the log sums over the correct subset of gammas_(k=i, j, c) 
     }
+    
+    pre_aic <- t(colSums(pre_aic))  #  log sums over all ratings k the (previous) logsum of gammas of the j movies rated k=i, for each user i. dims = (C, i) # pre_aic is now the matrix of the part of the equation after the Pi in both the numerator and denominator for each C,i combination
+    pre_aic <- exp(pre_aic) # returns our expression to the non-logged world
+  
+    
+  
+    exp(gamma/aic)
+    
+    
+    #basically took the logsum/product of all the movies rated 1 (then 2,...) for user i in cluster 1 wieghts, then log summed all those log sums over all ratings k for each user i
+    
+    
+     new = array with dims = 4,6,2
+    t(colSums(new)) = matrix with rows = 3rd margin slices in order, cols = colsums i.e. dims = 
+    
+      dims = (movies/items, users, ratings)
+    (items, clusters)
+    
+    (movies, clusters, ratings)
+    
+    
+    
+ ###################################################   
     
     # in the numerator we multiply all gamma[c,j,k] for a given class c, all movies j that have been rated by the active user, k being the rating that the active user actually gave to this movie ? And in the denominator sum all such products for all classes ?
     
@@ -202,6 +233,16 @@ bayesian_predict <- function(hard.assignments, active.users) {
 
     gamma.parameter <- gamma.numer/gamma.denom
   }
+
+
+################# old beginnings of E-step
+    #e.step1 <- log(mu) + log(gamma) # numerator of aic using log probabilities
+    #for (j in 1:length(items)){ 
+      
+    #e.step2 <- logSumExp(log(mu) + log(gamma.sum)) # normalizing 
+    #aic <- e.step1 - e.step2 
+    #}
+    
 ```
 
 
