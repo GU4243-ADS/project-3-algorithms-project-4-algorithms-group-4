@@ -68,15 +68,13 @@ E-step math: $aic := log(\hat{\mu}) + \sum log(\gamma) - log(\sum e^{log (\mu) +
 ### EM train algo
 
 ```{r Model-Based Algorithm}
-library(matrixStats)
-
 mov.train <- movie_UI # to clarify that this is training data, Note: the unrated user-movie combos are NA's
+data <- mov.train[1:500, ] # subset for speed (until finished)
 
 EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){ 
   
   ############## Step 1 - Initial Conditions and Set up ####################
   
-  data <- mov.train[1:500, ] # subset for speed (until finished)
   data[which(is.na(data))] <- 0 #sets any NAs to 0s
   # Note: length(which(rowSums(data) == 0)) is 0 which means ther is extension on at least 1 dimension for each user, i.e. every user rated at least 1 movie
   C <- 12 # Half of the movie genres according to IMDB
@@ -123,8 +121,8 @@ EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){
     #aic <- aic_numer/aic_denom #^^^^^^^^ # dims = (users, clusters) # NaNs introduced.... :(
     aic <- aic_numer - aic_denom #^^^^^^^^^^^ this is equivalent to dividing because I am subtracting two logged entities.
     # but isn't aic really logged(aic) now.... so won't it be incompatible with my processes in the M-step...???
+    aic <- exp(aic) # not logged anymore
     
-   
   ######################## Step 3 - Maximization #########################
  
   ## Estimate Mu 
@@ -177,6 +175,7 @@ EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){
   return(list("hard.assignments" = hard.assignments, "gamma" = gamma, "mu" = mu))
 }
 
+
 ```
 
 ### Predict function
@@ -187,21 +186,25 @@ EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){
 # active.users = the test data user-item matrix
 # hard.assignments = the hard.assignments output from the EM_train func
 
-bayesian_predict <-function(data, j,  aic, gamma){
-  n_users <- dim(data)[1]
+  hard.assignments <- matrix(0, nrow = n.users, ncol = C)
+  hard.assignments[, 5] <- rep(1, n.users)
 
-  
-  predict_rank <- matrix(0, nrow = n_users)
+
+bayesian_predict <-function(data, j,  hard.assignments, gamma){
+  n.users <- dim(data)[1]
+
+
+  predict.rank <- matrix(0, nrow = n.users)
     for (k in 1:6){
-      predict_rank <- predict_rank + k * aic %*% gamma[, j, k] # non-conformable arguments... 
+      predict.rank <- predict.rank + k * hard.assignments %*% gamma[C, , k] 
     }
   }
 
 
-n_items <- dim(data)[2]
+n.items <- dim(mov.train)[2]
   
-for (j in 1:n_items) {
-data[, j] <- bayesian_predict(data, j, aic, gamma)}
+for (j in 1:n.items) {
+mov.train.predict[, j] <- bayesian_predict(mov.train, j, hard.assignments, gamma)}
 ```
 
 Notes to make predictions from EM: 
@@ -212,19 +215,37 @@ Notes to make predictions from EM:
 Predict rank function: 
 \[r_{a, m} = \sum_{k=1}^6 k \frac{\sum_{c=1}^C \mu_c \gamma_{m,c}^k \prod_{j\in I(a)} \gamma_{j,c}^{r_{a,j}}}{\sum_{c=1}^C \mu_c \prod_{j\in I(a)} \gamma_{j,c}^{r_{a,j}}}\]
 
+
+### Test error
+```{r}
+what.to.predict <- which(!is.na(movies_UI_test))
+
+(mse <- sum((predictions[what.to.predict] - movie_UI_test[what.to.predict])**2)/length(what.to.predict))
+(mae <- sum(abs(predictions[indices_to_predict] - movie_UI_test[what.to.predict]))/length(what.to.predict))
+
+
+R2.numer <- 1 - sum((predictions[what.to.predict] - movies_UI_test[what.to.predict])**2)
+R2.denom <- sum((movies_UI_test[what.to.predict] - mean(movies_UI_test[what.to.predict]))**2)
+
+(R2 <- R2.numer/R2.denom)
+```
+
+
 ```{r}
 ### Alternate M-step
 ###### What is this?? it looks like a much more efficient M-step :).. It is kind of genius in its efficiency.. I tried to limit what was inside the for loop but this is elegant because correctly identifies that what makes the code slow is the number of iterations more than the amount of code within the iterations so it puts steps thing in the loop I left out of it.
   
   for (i in 1:k){
-    gamma.numer[, , ] <- t(aic) %*% (movie == k)
+    gamma.numer[, , ] <- (aic) %*% (movie == k)
     gamma.denom[, , ] <- colSums(gamma.numer)
 
-    gamma.parameter <- gamma.numer/gamma.denom
+    gamma <- gamma.numer/gamma.denom
   }
 
 
 ################# old beginnings of E-step
+library(matrixStats)
+
     e.step1 <- log(mu) + log(gamma) # numerator of aic using log probabilities
     for (j in 1:length(items)){ 
       
@@ -241,6 +262,51 @@ Predict rank function:
 ```
 
 
+```{r}
+mov.train <- movie_UI # to clarify that this is training data, Note: the unrated user-movie combos are NA's
+data <- mov.train[1:500, ] # subset for speed (until finished)
+
+EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){ 
+  
+  ############## Step 1 - Initial Conditions and Set up ####################
+  
+  data[which(is.na(data))] <- 0 #sets any NAs to 0s
+  # Note: length(which(rowSums(data) == 0)) is 0 which means ther is extension on at least 1 dimension for each user, i.e. every user rated at least 1 movie
+  C <- 12 # Half of the movie genres according to IMDB
+  k = 6 # number of ratings
+  n.users <- dim(data)[1]
+  n.items <- dim(data)[2]
+  
+  users <- rownames(data)
+  items <- colnames(data) # used items as a generic for both movies and vroots
+  mu <- rep(1/C, C) # vector length C
+  gamma <- array(1/k, dim = c(n_items, C, k)) # dims = items(movies), clusters, ratings
+  #aic <- matrix(1/6, nrow = n_users, ncol = C) # cluster assignment/probability matrix, dims = users, clusters
+  #gamma.norm <- gamma/mean(gamma)
+  iter <- 1
+  
+  aic <- matrix(NA, nrow = n.users, ncol = C)
+  
+  while(is.conv > tau | iter < ITER) {
+    
+    ## Expectation Step
+    for(i in 1:n.users){
+      rank = na.omit(mov.train[i, ])
+      for(c in 1:C) {
+        for(k in 1:6){
+          aic[i, c] <- aic[i, c]*gamma[c, mov.train[i, k], rank[k]]
+        }
+      }
+    }
+    
+    
+    ## Convergence Check
+    is.conv <- norm(aic - aic_pre, type = "2") # measure of the change in cluster assignments
+
+  aic_pre <- aic
+  iter = iter + 1
+  }
+```
 
 
 Try simplifying the sum and exponential to see that it is the same equation as in the last two slides. It is easy to run into underflow problem when dealing with these probabilities that are very small. You can see the answers in @104 to see how to deal with it (the usual strategy is to use log-probabilities instead).
@@ -264,4 +330,23 @@ Notes on EM:
 - Use cross-validation to find optimal number of clusters (if computationally taxing, then use a k-fold CV where k = 1)
 - Terminate when if iter = 10000 or if $\sum_{c = 1}^C |{\hat{\mu}_c^{t+1} - \hat{\mu}_c^{t}}|^2$ where |x| is the l-2 norm. 
 - Can do random initializations and find log-likelihood but not necessary
+
+
+In case neighbors isn't done... 
+```{r}
+selectNeighborWeights <- function(df, weights, n){
+  users <- rownames(df)
+  m <- length(users)
+  neighbors <- matrix(rep(NA, m * n), m, n)
+  neighors <- data.frame(neighbors)
+  rownames(neighbors) <- users
+  
+  for (i in 1:m){
+    neighbors[i, ] <- colnames(weights)[order(weights[i, ], decreasing=TRUE)][1:n]
+  }
+  return (neighbors)
+}
+```
+
+
 
