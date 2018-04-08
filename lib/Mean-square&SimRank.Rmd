@@ -1,0 +1,332 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+setwd("/Users/yunli/Documents/GitHub/project-3-algorithms-project-4-algorithms-group-4/")
+
+load(file = "../data/MS_UI.RData")
+load(file = "../data/movie_UI.RData")
+
+MS_train <- MS_UI#need to seperate into train data and test data
+
+
+Movie_train <- movie_UI
+
+```
+
+## 1. Implement Mean square difference
+
+```{r}
+
+#### Calculate Mean square difference
+
+train_start <- Sys.time()
+meanSquareDiff <- function(df){
+  m <- dim(df)[1] #user number
+  dissim <- matrix(rep(NA, m * m), m, m)
+  dissim <- data.frame(dissim)
+  users <- rownames(df)
+  colnames(dissim) <- users
+  rownames(dissim) <- users
+  for (i in 1:m){
+    for (j in 1:m){
+      r_i <- df[i,]
+      r_j <- df[j,]
+      dissim[i, j] <- mean((r_i - r_j)^2, na.rm = T)
+    }
+  }
+  maxDissim <- max(dissim)
+  sim <- (maxDissim - dissim)/maxDissim
+  return (sim)
+  
+}
+
+weights_MSD_train_MS <- meanSquareDiff(MS_train)
+saveRDS(weights_MSD_train_MS, file = "../output/weights_MSD_train_MS.RData")
+write.csv(weights_MSD_train_MS, file='../output/weights_MSD_train_MS.csv', row.names = TRUE)
+
+weights_MSD_train_Movie <- meanSquareDiff(Movie_train)
+saveRDS(weights_MSD_train_Movie, file = "../output/weights_MSD_train_Movie.RData")
+write.csv(weights_MSD_train_Movie, file='../output/weights_MSD_train_Movie.csv', row.names = TRUE)
+
+
+train_end <- Sys.time()
+train_time = train_end - train_start
+```
+
+##Implement SimRank model:
+
+##2. Implement SimRank 
+
+Control function
+```{r}
+#Read raw data files
+read.movie.data = T
+
+#Reshape data to wide format
+reshape.movie = T
+
+#Load Rdata
+load.movie.data = T
+
+#Implementation algorythims
+model.sim.rank <- T
+```
+
+Read Movie Dataset:
+```{r}
+if (read.movie.data){
+
+  #Read dataset from directory
+  movie.data.train <- read.csv("../data/eachmovie_sample/data_train.csv")
+  movie.data.test <- read.csv("../data/eachmovie_sample/data_test.csv")
+  # movie.data.train <- movie.data.train[1:1855,]#it needs too long to train the model. So I used small dataset to test first.
+  movie.data.train <- movie.data.train[,-1]
+  movie.data.test <- movie.data.test[,-1]
+  
+  #Check dataset information
+  paste("Data Dimension:", dim(movie.data.train)[1], "x", dim(movie.data.train)[2])
+  paste("Number of Unique Movies:",length(unique(movie.data.train[,1])))
+  paste("Number of Unique Users:",length(unique(movie.data.train[,2])))
+  paste("Number of 0 ratings:", sum(movie.data.train[,3] == 1))
+
+}
+```
+Data Processing
+```{r}
+if(reshape.movie){
+
+  #Reshapes dataframe
+  movie.data.train <- reshape(movie.data.train, 
+                              v.names = "Score", 
+                              direction = "wide", 
+                              idvar = "User", 
+                              timevar = "Movie")
+  
+   movie.data.test <- reshape(movie.data.test, 
+                              v.names = "Score", 
+                              direction = "wide", 
+                              idvar = "User", 
+                              timevar = "Movie") 
+  
+  
+  
+  paste("Data Dimension:", dim(movie.data.train)[1], "x", dim(movie.data.train)[2])
+  paste("Data Dimension:", dim(movie.data.test)[1], "x", dim(movie.data.test)[2])
+  
+  #Save files to data directory
+  save(movie.data.train, file = "../data/movie_data_train_wide.Rdata")
+  save(movie.data.test, file = "../data/movie_data_test_wide.Rdata")
+  }
+```
+read web dataset
+```{r}
+# if (read.ms.data){
+# 
+#   #Read dataset from directory
+#   ms.data.train <- read.csv("../data/ms_data_train.csv")
+#   ms.data.test <- read.csv("../data/ms_data_test.csv")
+#   
+#   ms.data.train <- ms.data.train[,-1]
+#   ms.data.test <- ms.data.test[,-1]
+#   
+#   #Reshapes TRAIN dataframe -------------------------------------------
+#   User <- rep(NA, nrow(ms.data.train))
+#   
+#   for(i in 1:nrow(ms.data.train)){
+#     User[i] <- ifelse(ms.data.train[i,1] == "C", ms.data.train[i,3], User[i-1])
+#   }
+#   ms.data.train$User <- User
+#   ms.data.train <- ms.data.train[ms.data.train$V1 == "V",]
+#   ms.data.train <- ms.data.train[,-1]
+#   
+#   names(ms.data.train) <- c("Vroot", "Visits", "User")
+#   
+#   #Reshapes TEST dataframe -------------------------------------------
+#   User <- rep(NA, nrow(ms.data.test))
+#   
+#   for(i in 1:nrow(ms.data.test)){
+#     User[i] <- ifelse(ms.data.test[i,1] == "C", ms.data.test[i,3], User[i-1])
+#   }
+#   ms.data.test$User <- User
+#   ms.data.test <- ms.data.test[ms.data.test$V1 == "V",]
+#   ms.data.test <- ms.data.test[,-1]
+#   
+#   names(ms.data.test) <- c("Vroot", "Visits", "User")
+#   
+#   #Clean
+#   rm(User, i)
+# }
+# 
+# if(reshape.ms){
+# 
+#   #Reshapes dataframe
+#   ms.data.train <- reshape(ms.data.train, 
+#                               v.names = "Visits", 
+#                               direction = "wide", 
+#                               idvar = "User", 
+#                               timevar = "Vroot")
+#   
+#    ms.data.test <- reshape(ms.data.test, 
+#                               v.names = "Visits", 
+#                               direction = "wide", 
+#                               idvar = "User", 
+#                               timevar = "Vroot") 
+#   
+#   
+#   
+#   paste("Data Dimension:", dim(ms.data.train)[1], "x", dim(ms.data.train)[2])
+#   paste("Data Dimension:", dim(ms.data.test)[1], "x", dim(ms.data.test)[2])
+#   
+#   #Save files to data directory
+#   save(ms.data.train, file = "../data/ms_data_train_wide.Rdata")
+#   save(ms.data.test, file = "../data/ms_data_test_wide.Rdata")
+#   }
+```
+
+Load data
+```{r}
+#Load Rdata files
+if(load.movie.data){
+  load("../data/movie_data_train_wide.Rdata")
+  load("../data/movie_data_test_wide.Rdata")
+}
+
+# if(load.ms.data){
+#   load("../data/MS_UI.Rdata")
+#   load("../data/ms_data_test_wide.Rdata")
+# }
+```
+
+Helper functions for SimRank Model
+```{r}
+# returns the corresponding row or column for a user or movie.
+get_movies_num <- function(user){
+  u_i <- match(user, users)
+  return(graph[u_i,-1])
+}
+
+get_users_num <- function(movie){
+  m_j <- match(movie, movies)
+  return(graph[,m_j+1])
+}
+
+# return the users or movies with a non zero
+get_movies <- function(user){
+  series = get_movies_num(user)
+  return(movies[which(series!=0)])
+}
+
+get_users <- function(movie){
+  series = get_users_num(movie)
+  return(users[which(series!=0)])
+}
+
+user_simrank <- function(u1, u2, C) {
+  if (u1 == u2){
+    return(1)
+  } else {
+  pre = C / (sum(get_movies_num(u1)) * sum(get_movies_num(u2)))
+  post = 0
+  for (m_i in get_movies(u1)){
+    for (m_j in get_movies(u2)){
+      i <- match(m_i, movies)
+      j <- match(m_j, movies)
+      post <- post + movie_sim[i, j]
+    }
+  }
+  return(pre*post)
+  }
+}
+
+movie_simrank <- function(m1, m2, C) {
+  if (m1 == m2){
+    return(1)
+  } else {
+    pre = C / (sum(get_users_num(m1)) * sum(get_users_num(m2)))
+    post = 0
+    for (u_i in get_users(m1)){
+      for (u_j in get_users(m2)){
+        i <- match(u_i, users)
+        j <- match(u_j, users)
+        post <- post + user_sim[i, j]
+      }
+    }
+    return(pre*post)
+  }
+}
+
+simrank <- function(C=0.8, times = 1, calc_user = T, calc_movie = F, data){
+  
+  for (run in 1:times){
+    
+    if(calc_user){
+    for (ui in users){
+      for (uj in users){
+        i = match(ui, users)
+        j = match(uj, users)
+        user_sim[i, j] <<- user_simrank(ui, uj, C)
+      }
+    }
+    }
+    if(calc_movie){
+    for (mi in movies){
+      for (mj in movies){
+        i = match(mi, movies)
+        j = match(mj, movies)
+        movie_sim[i, j] <<- movie_simrank(mi, mj, C)
+      }
+    }
+    }
+  }
+}
+```
+
+Implement SimRank
+
+```{r}
+if(model.sim.rank){
+  graph <- movie.data.train[1:5055, 1:5055]
+
+graph[is.na(graph)] <- 0
+
+graph[,-1][graph[,-1] < 5] <- 0
+graph[,-1][graph[,-1] >= 5] <- 1
+
+
+# set similarity matrices to be calculated
+calc_user = T
+calc_movie = F
+
+# initialize the similarity matrices
+user_sim <- diag(dim(graph)[1])
+movie_sim <- diag(dim(graph)[2])
+
+# create list of users and movies
+users <- graph[,1]
+movies <- colnames(graph[,-1])
+
+simrank(0.8, 1)
+
+colnames(user_sim) <- users
+user_sim <- cbind(users, user_sim)
+write.csv(user_sim, file='../output/usersim.csv', row.names = FALSE)
+}
+```
+Predict
+```{r}
+
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
