@@ -67,6 +67,9 @@ E-step math: $aic := log(\hat{\mu}) + \sum log(\gamma) - log(\sum e^{log (\mu) +
 
 ### EM train algo
 
+
+The E-step computation is slightly more tricky, as we are not using all the gammas. So first, by the same reasoning as we had previously, we only need to compute the numerator (the denominator is a normalization constant, and we can just compute that as the sum of the numerator afterwards). Now in the formula we have for each fixed i that we are looping over movies j and only looking at the gamma that corresponds to the actual rating r_{i, j}, so we have to index over gamma to produce the correct array (using r_{i,j}). Once we have the array, we can then sum over the appropriate log gammas.
+
 ```{r Model-Based Algorithm}
 mov.train <- movie_UI # to clarify that this is training data, Note: the unrated user-movie combos are NA's
 data <- mov.train[1:500, ] # subset for speed (until finished)
@@ -85,8 +88,8 @@ EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){
   users <- rownames(data)
   items <- colnames(data) # used items as a generic for both movies and vroots
   mu <- rep(1/C, C) # vector length C
-  gamma <- array(1/k, dim = c(n_items, C, k)) # dims = items(movies), clusters, ratings
-  #aic <- matrix(1/6, nrow = n_users, ncol = C) # cluster assignment/probability matrix, dims = users, clusters
+  gamma <- array(1/6, dim = c(k, n_items, C)) # dims = ratings, items(movies), clusters
+  aic <- matrix(1/C, nrow = n_users, ncol = C) # cluster assignment/probability matrix, dims = users, clusters
   #gamma.norm <- gamma/mean(gamma)
   iter <- 1
   
@@ -96,7 +99,6 @@ EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){
     
 
     pre_aic <- array(NA, c(k, length(users), C))
-    gamma <- aperm(gamma, c(3, 1, 2)) # change dims to dims = (ratings, movies, clusters)
     gamma <- log(gamma) # logs gamma so we can use log sums instead of products
     for (i in 1:k) {
       temp <- apply(gamma, 3, function(x) x%*%t(data == i)) # each element of the kth row of resulting array represents the log sum (i.e. product) of movie-rating=i pairs of user i given class C. apply() outputs matrix with weird dims = (length(seq_along(\the result of the func on each sheet\)), number of sheets in third margin)
@@ -125,6 +127,7 @@ EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){
     
   ######################## Step 3 - Maximization #########################
  
+    
   ## Estimate Mu 
   mu <- apply(aic, 2, sum)/length(users) # vector of cluster shares/probabilities
   
@@ -286,25 +289,31 @@ EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){
   users <- rownames(data)
   items <- colnames(data) # used items as a generic for both movies and vroots
   mu <- rep(1/C, C) # vector length C
-  gamma <- array(1/k, dim = c(n_items, C, k)) # dims = items(movies), clusters, ratings
+   gamma <- array(1/6, dim = c(k, n_items, C)) # dims = ratings, items(movies), clusters
   #aic <- matrix(1/6, nrow = n_users, ncol = C) # cluster assignment/probability matrix, dims = users, clusters
   #gamma.norm <- gamma/mean(gamma)
   iter <- 1
   
   aic <- matrix(NA, nrow = n.users, ncol = C)
+  gamma <- gamma/mean(gamma)
   
   while(is.conv > tau | iter < ITER) {
     
     ## Expectation Step
     for(i in 1:n.users){
-      rank = na.omit(mov.train[i, ])
+      items <-  which(!is.na(mov.train[i, ]))# items that user i ranked/visited
+      rank <- na.omit(mov.train[i, ]) # specific rankings of items
+      
       for(c in 1:C) {
         for(k in 1:6){
-          aic[i, c] <- aic[i, c]*gamma[c, mov.train[i, k], rank[k]]
+          aic[i, c] <- mu[c]*gamma[rank[k], movies[k], c]
         }
       }
+
+    return(aic)
     }
-    
+  
+    # For each i, the denominator should be the same. 
     
     ## Convergence Check
     is.conv <- norm(aic - aic_pre, type = "2") # measure of the change in cluster assignments
@@ -312,6 +321,7 @@ EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){
   aic_pre <- aic
   iter = iter + 1
   }
+}
 ```
 
 
