@@ -108,15 +108,21 @@ EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){
     }
     
     pre_aic <- t(colSums(pre_aic))  #  log sums over all ratings k the (previous) logsum of gammas of the j movies rated k=i, for each user i. dims = (C, i) # pre_aic is now the matrix of the part of the equation after the Pi in both the numerator and denominator for each C,i combination
-    pre_aic <- exp(pre_aic) # returns our expression to the non-logged world
+    
+    #pre_aic <- exp(pre_aic) # returns our expression to the non-logged world #^^^^^^^^
+    
     #conclusion of above: basically took the logsum/product of all the movies rated 1 (then 2,...) for user i in cluster 1 wieghts, then log summed all those log sums over all ratings k for each user i
-    aic_numer <- mu * pre_aic # gives the numerator of aic. dims = (C, i) #I am assuming C clusters are still oriented 1:C in the same order in both mu and pre_aic
+    aic_numer <- log(mu) + pre_aic # gives the numerator of aic. dims = (C, i) #I am assuming C clusters are still oriented 1:C in the same order in both mu and pre_aic
+    #^^^^^^^^^ is logging then adding (not multiplying) mu the right thing to do?
+    
     aic_numer <- t(aic_numer) # dims = (users, Clusters)
     
-    aic_denom <- rowSums(aic_numer)  # every user gets the same denom over all the clusters (here, 1 cluster = 1 col). dims = vector length(users)
+    aic_denom <- log(rowSums(exp(aic_numer)))  # every user gets the same denom over all the clusters (here: 1 cluster = 1 row). dims = vector length(users)
+    #^^^^^^^^^^^^^^ here I am exp'ing the numer to return to the non-logged world, summing as demanded to produce denom, then logging that denom to be compatible with the logged state of the numer
     
-    #aic <- aic_numer/aic_denom
-    aic <- exp(log(aic_numer) - log(aic_denom)) # dims = (users, clusters) # NaNs introduced.... :(
+    #aic <- aic_numer/aic_denom #^^^^^^^^ # dims = (users, clusters) # NaNs introduced.... :(
+    aic <- aic_numer - aic_denom #^^^^^^^^^^^ this is equivalent to dividing because I am subtracting two logged entities.
+    # but isn't aic really logged(aic) now.... so won't it be incompatible with my processes in the M-step...???
     
    
   ######################## Step 3 - Maximization #########################
