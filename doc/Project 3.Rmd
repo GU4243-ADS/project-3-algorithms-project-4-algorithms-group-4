@@ -68,8 +68,6 @@ E-step math: $aic := log(\hat{\mu}) + \sum log(\gamma) - log(\sum e^{log (\mu) +
 ### EM train algo
 
 
-The E-step computation is slightly more tricky, as we are not using all the gammas. So first, by the same reasoning as we had previously, we only need to compute the numerator (the denominator is a normalization constant, and we can just compute that as the sum of the numerator afterwards). Now in the formula we have for each fixed i that we are looping over movies j and only looking at the gamma that corresponds to the actual rating r_{i, j}, so we have to index over gamma to produce the correct array (using r_{i,j}). Once we have the array, we can then sum over the appropriate log gammas.
-
 ```{r Model-Based Algorithm}
 mov.train <- movie_UI # to clarify that this is training data, Note: the unrated user-movie combos are NA's
 data <- mov.train[1:500, ] # subset for speed (until finished)
@@ -271,6 +269,9 @@ library(matrixStats)
 ```
 
 
+
+The E-step computation is slightly more tricky, as we are not using all the gammas. So first, by the same reasoning as we had previously, we only need to compute the numerator (the denominator is a normalization constant, and we can just compute that as the sum of the numerator afterwards). Now in the formula we have for each fixed i that we are looping over movies j and only looking at the gamma that corresponds to the actual rating r_{i, j}, so we have to index over gamma to produce the correct array (using r_{i,j}). Once we have the array, we can then sum over the appropriate log gammas.
+
 ```{r}
 mov.train <- movie_UI # to clarify that this is training data, Note: the unrated user-movie combos are NA's
 data <- mov.train[1:500, ] # subset for speed (until finished)
@@ -294,6 +295,7 @@ EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){
   #gamma.norm <- gamma/mean(gamma)
   iter <- 1
   
+  aic.numer <- matrix(NA, nrow = n.users, ncol = C)
   aic <- matrix(NA, nrow = n.users, ncol = C)
   gamma <- gamma/mean(gamma)
   
@@ -302,18 +304,57 @@ EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){
     ## Expectation Step
     for(i in 1:n.users){
       items <-  which(!is.na(mov.train[i, ]))# items that user i ranked/visited
-      rank <- na.omit(mov.train[i, ]) # specific rankings of items
-      
-      for(c in 1:C) {
-        for(k in 1:6){
-          aic[i, c] <- mu[c]*gamma[rank[k], movies[k], c]
+      rank <- na.omit(mov.train[i, ]) # specific rankings of items 
+    
+      for(c in 1:C) {      
+        for(k in 1:length(items)){ 
+          aic.numer[i, c] <- mu[c]*gamma[rank[[k]], items[[k]], c]
+          
         }
       }
 
-    return(aic)
+      aic[i, ] <- aic.numer[i, ]/sum(aic.numer[i, ]) # for each i, the denominator should be the same. 
+      return(aic)
     }
+    
+    ## M-step 
+    
+     ## Estimate Mu 
+  mu <- apply(aic, 2, sum)/length(users) # vector of cluster shares/probabilities
   
-    # For each i, the denominator should be the same. 
+  ## Estimate Gamma
+  
+  #gamma <- function() { # this is func is just diagnostic while I am still coding
+  
+  indicator.numer <- array(0, dim = c(length(users),length(items), k))
+  indicator.denom <- matrix(0, nrow = length(users), ncol = length(items))
+    
+  for (i in 1:k) 
+    # can this be done with an apply appoach? yes, apply and margin = 3? but how to use apply with multiple funcs and subsetting, maybe define a func like below?
+    {
+      indicator.numer[,,i][which(data == i)] <- 1 # indicator array to identify each instance in which user i rated movie j with rating k
+    }
+  indicator.numer <- aperm(indicator.numer, c(2,1,3)) # transposing so that the matrix is conformable to aic. new dims = (movies/items, users, ratings)
+  # would transposing each sheet in the for loop be faster?
+  # maybe faster to transpose aic rather than aperm indicator.nomin
+   
+  numer <- apply(indicator.numer, 3, function(x) x%*%aic) # each element of resulting array represents the sum of the class C aic wieghts of every user who rated that jth movie with that rating k. apply() outputs matrix with weird dims = (length(seq_along(\the result of the func on each sheet\)), number of sheets in third margin)
+  numerator <- array(numer, c(length(items), C, k)) # puts data in the correct shape. dims = (movies, clusters, ratings) 
+  
+  
+  indicator.denom[which(data != 0)] <- 1 # indicator array to identify each instance in which user i rated movie j with any rating
+  indicator.denom <- t(indicator.denom) # dims = movies, users. 
+  denominator <- indicator.denom%*%aic # each element of the resulting matrix represents the sum of the class C aic weights of every user who rated movie j with any rating. dims = (movies, clusters). Note: denominator is common across ratings k, but not across clusters, there for the following code would be unecessary: denominator <- apply(indicator.denom, 3, function(x) x%*%aic)
+  
+  #result <- nominator/denominator # dims = movies, clusters, ratings
+  result <- apply(numerator, 3, function(x) x/denominator) # divides each numerator element by its respective denominator value. apply() returns a weirdly shaped matrix again.
+  gamma <- array(result, c(length(items), C, k)) # puts data in the correct shape. dims = (movies, clusters, ratings)
+  #gamma
+#} # end of the diagnostic func
+#system.time(new <- gamma())
+#rowSums(aperm(new, c(1, 3, 2))[,,1]) # this sums over k's for each movie. The sums should equal 1. They do!!!  but I have some NaNs which are introduced when I divide the numerator by the denominator. ... what to do... logs...? just set them to 0?? 
+  
+  # FIX NaNs: log the numerator and the denominator then subtract. 
     
     ## Convergence Check
     is.conv <- norm(aic - aic_pre, type = "2") # measure of the change in cluster assignments
