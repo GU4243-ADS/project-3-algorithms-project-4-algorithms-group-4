@@ -14,10 +14,10 @@ load(file = "../data/MS_UI.RData")
 load(file = "../data/movie_UI.RData")
 
 MS_train <- MS_UI#need to seperate into train data and test data
-# MS_test <- ??
+
 
 Movie_train <- movie_UI
-#Movie_train <- ?
+
 ```
 
 ## 1. Implement Mean square difference
@@ -49,10 +49,11 @@ meanSquareDiff <- function(df){
 
 weights_MSD_train_MS <- meanSquareDiff(MS_train)
 saveRDS(weights_MSD_train_MS, file = "../output/weights_MSD_train_MS.RData")
+write.csv(weights_MSD_train_MS, file='../output/weights_MSD_train_MS.csv', row.names = TRUE)
 
 weights_MSD_train_Movie <- meanSquareDiff(Movie_train)
 saveRDS(weights_MSD_train_Movie, file = "../output/weights_MSD_train_Movie.RData")
-
+write.csv(weights_MSD_train_Movie, file='../output/weights_MSD_train_Movie.csv', row.names = TRUE)
 
 
 train_end <- Sys.time()
@@ -85,7 +86,7 @@ if (read.movie.data){
   #Read dataset from directory
   movie.data.train <- read.csv("../data/eachmovie_sample/data_train.csv")
   movie.data.test <- read.csv("../data/eachmovie_sample/data_test.csv")
-  movie.data.train <- movie.data.train[1:1855,]
+  movie.data.train <- movie.data.train[1:1855,]#it needs too long to train the model. So I used small dataset to test first.
   movie.data.train <- movie.data.train[,-1]
   movie.data.test <- movie.data.test[,-1]
   
@@ -124,6 +125,70 @@ if(reshape.movie){
   save(movie.data.test, file = "../data/movie_data_test_wide.Rdata")
   }
 ```
+read web dataset
+```{r}
+# if (read.ms.data){
+# 
+#   #Read dataset from directory
+#   ms.data.train <- read.csv("../data/ms_data_train.csv")
+#   ms.data.test <- read.csv("../data/ms_data_test.csv")
+#   
+#   ms.data.train <- ms.data.train[,-1]
+#   ms.data.test <- ms.data.test[,-1]
+#   
+#   #Reshapes TRAIN dataframe -------------------------------------------
+#   User <- rep(NA, nrow(ms.data.train))
+#   
+#   for(i in 1:nrow(ms.data.train)){
+#     User[i] <- ifelse(ms.data.train[i,1] == "C", ms.data.train[i,3], User[i-1])
+#   }
+#   ms.data.train$User <- User
+#   ms.data.train <- ms.data.train[ms.data.train$V1 == "V",]
+#   ms.data.train <- ms.data.train[,-1]
+#   
+#   names(ms.data.train) <- c("Vroot", "Visits", "User")
+#   
+#   #Reshapes TEST dataframe -------------------------------------------
+#   User <- rep(NA, nrow(ms.data.test))
+#   
+#   for(i in 1:nrow(ms.data.test)){
+#     User[i] <- ifelse(ms.data.test[i,1] == "C", ms.data.test[i,3], User[i-1])
+#   }
+#   ms.data.test$User <- User
+#   ms.data.test <- ms.data.test[ms.data.test$V1 == "V",]
+#   ms.data.test <- ms.data.test[,-1]
+#   
+#   names(ms.data.test) <- c("Vroot", "Visits", "User")
+#   
+#   #Clean
+#   rm(User, i)
+# }
+# 
+# if(reshape.ms){
+# 
+#   #Reshapes dataframe
+#   ms.data.train <- reshape(ms.data.train, 
+#                               v.names = "Visits", 
+#                               direction = "wide", 
+#                               idvar = "User", 
+#                               timevar = "Vroot")
+#   
+#    ms.data.test <- reshape(ms.data.test, 
+#                               v.names = "Visits", 
+#                               direction = "wide", 
+#                               idvar = "User", 
+#                               timevar = "Vroot") 
+#   
+#   
+#   
+#   paste("Data Dimension:", dim(ms.data.train)[1], "x", dim(ms.data.train)[2])
+#   paste("Data Dimension:", dim(ms.data.test)[1], "x", dim(ms.data.test)[2])
+#   
+#   #Save files to data directory
+#   save(ms.data.train, file = "../data/ms_data_train_wide.Rdata")
+#   save(ms.data.test, file = "../data/ms_data_test_wide.Rdata")
+#   }
+```
 
 Load data
 ```{r}
@@ -132,6 +197,11 @@ if(load.movie.data){
   load("../data/movie_data_train_wide.Rdata")
   load("../data/movie_data_test_wide.Rdata")
 }
+
+# if(load.ms.data){
+#   load("../data/MS_UI.Rdata")
+#   load("../data/ms_data_test_wide.Rdata")
+# }
 ```
 
 Helper functions for SimRank Model
@@ -222,7 +292,7 @@ Implement SimRank
 
 ```{r}
 if(model.sim.rank){
-  graph <- movie.data.train[1:7, 1:929]
+  graph <- movie.data.train[1:5055, 1:5055]
 
 graph[is.na(graph)] <- 0
 
@@ -248,6 +318,10 @@ colnames(user_sim) <- users
 user_sim <- cbind(users, user_sim)
 write.csv(user_sim, file='../output/usersim.csv', row.names = FALSE)
 }
+```
+Predict
+```{r}
+
 ```
 
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
