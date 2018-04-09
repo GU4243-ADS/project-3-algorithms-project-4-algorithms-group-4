@@ -26,8 +26,8 @@ Using different similarity weights, the memory based model compares all users to
 |:---:| :---:| :---:| :---:| :---:|:---:|---
 Rank Score| MS | 37.57| 37.57| 37.82|45625.77|N/A
 MAE|Movie|1.085|1.085|1.095|326.54 |1.0497
-Run Time| MS| 0.76H| 0.70H|0.62H|2.7H| 
-Run Time| Movie| 1.75H|2.28H|1.5H|N/A|8.5H
+Run Time| MS| 0.76H| 0.70H|0.62H|2.7H|N/A
+Run Time| Movie| 1.75H|2.28H|1.5H|1.5H (1000rows)|8.5H
 
 
 ##### Selecting Neighbors
