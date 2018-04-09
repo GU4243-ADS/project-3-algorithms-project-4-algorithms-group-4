@@ -69,8 +69,10 @@ E-step math: $aic := log(\hat{\mu}) + \sum log(\gamma) - log(\sum e^{log (\mu) +
 
 
 ```{r Model-Based Algorithm}
+load(file = "../data/movie_UI.RData")
 mov.train <- movie_UI # to clarify that this is training data, Note: the unrated user-movie combos are NA's
 data <- mov.train[1:500, ] # subset for speed (until finished)
+#data <- mov.train
 
 EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){ 
   
@@ -87,8 +89,8 @@ EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){
   items <- colnames(data) # used items as a generic for both movies and vroots
   mu <- rep(1/C, C) # vector length C
   gamma <- array(1/6, dim = c(k, n_items, C)) # dims = ratings, items(movies), clusters
+  gamma <- gamma/mean(gamma)
   aic <- matrix(1/C, nrow = n_users, ncol = C) # cluster assignment/probability matrix, dims = users, clusters
-  #gamma.norm <- gamma/mean(gamma)
   iter <- 1
   
   while(is.conv > tau | iter < ITER) {
@@ -156,12 +158,16 @@ EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){
   #result <- nominator/denominator # dims = movies, clusters, ratings
   result <- apply(numerator, 3, function(x) x/denominator) # divides each numerator element by its respective denominator value. apply() returns a weirdly shaped matrix again.
   gamma <- array(result, c(length(items), C, k)) # puts data in the correct shape. dims = (movies, clusters, ratings)
+  gamma <- aperm(gamma, c(3, 1, 2)) # dims = ratings, items, clusters
+  
+  
   #gamma
 #} # end of the diagnostic func
 #system.time(new <- gamma())
 #rowSums(aperm(new, c(1, 3, 2))[,,1]) # this sums over k's for each movie. The sums should equal 1. They do!!!  but I have some NaNs which are introduced when I divide the numerator by the denominator. ... what to do... logs...? just set them to 0?? 
-  
   # FIX NaNs: log the numerator and the denominator then subtract. 
+  
+
   
   ################# Step 4 - Convergence Conditions using l-2 norm ###############
   is.conv <- norm(aic - aic_pre, type = "2") # measure of the change in cluster assignments
@@ -171,9 +177,10 @@ EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){
   }
   
   ### Hard Assignment
+  library(matrixStats)
   hard.assignments <- (aic == rowMaxs(aic)) + 0 # I used a function from "MatrixsStats" library
   #hard.cluster <- apply(aic, 1, which.max) # hard cluster assignments
-  return(list("hard.assignments" = hard.assignments, "gamma" = gamma, "mu" = mu))
+  return(list("aic" = aic, "gamma" = gamma, "mu" = mu))
 }
 
 
@@ -181,23 +188,35 @@ EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){
 
 ### Predict function
 ```{r}
+load(file = "../data/movie_UI.RData")
+mov.train <- movie_UI # to clarify that this is training data, Note: the unrated user-movie combos are NA's
+data <- mov.train[1:500, ]
 
 ###########
 ### Inputs:
-# active.users = the test data user-item matrix
-# hard.assignments = the hard.assignments output from the EM_train func
+# active.users = the test data user-item matrix. dims = users, item 
+# hard.assignments = the hard.assignments output from the EM_train func. dims = users, clusters
+# gamma = final gamma matrix from the EM_train func. dims = ratings, items, clusters
+# k = number of ratings in the data set (EachMovie = 6, MS = ?)
+### Outputs: complete matrix of prodictions dims = dims of the active.users matrix 
 
   hard.assignments <- matrix(0, nrow = n.users, ncol = C)
   hard.assignments[, 5] <- rep(1, n.users)
+  
+  test.aic
+  hard.assignments <- test.hard.assignments
+  gamma <- test.gamma
+  active.users <- data
+  k <- 6
 
-
-bayesian_predict <-function(data, range, hard.assignments, gamma){
+bayesian_predict <-function(active.users, hard.assignments, gamma, k){
   n.users <- dim(data)[1]
+  n.items <- dim(data)[2]
 
 
-  predict.rank <- matrix(0, nrow = n.users)
-    for (k in 1:6){
-      predict.rank <- predict.rank + k * hard.assignments %*% gamma[j,  ,k] 
+  predict.rank <- matrix(0, nrow = n.users, ncol = ) # creates our predicted ratings output function. dims = users, items
+    for (i in 1:k){
+      predict.rank <- predict.rank + k * hard.assignments %*% gamma[C, , k] 
     }
   }
 
@@ -205,9 +224,10 @@ bayesian_predict <-function(data, range, hard.assignments, gamma){
 n.items <- dim(mov.train)[2]
   
 for (j in 1:n.items) {
-mov.train[, j] <- bayesian_predict(mov.train, hard.assignments = hard.assignments, gamma = gamma)
+mov.train[, j] <- bayesian_predict(mov.train, j, hard.assignments, gamma)
 }
 # says items are not of the same length -- confused mov.train[, j] has length 5055 and length(predict.rank) = 5055
+
 ```
 
 Notes to make predictions from EM: 
@@ -224,8 +244,7 @@ Predict rank function:
 what.to.predict <- which(!is.na(movies_UI_test))
 
 (mse <- sum((predictions[what.to.predict] - movie_UI_test[what.to.predict])**2)/length(what.to.predict))
-
-(mae <- sum(abs(predictions[what.to.predict] - movie_UI_test[what.to.predict]))/length(what.to.predict)) # movie_UI_predicted is the predicted data 
+(mae <- sum(abs(predictions[what.to.predict] - movie_UI_test[what.to.predict]))/length(what.to.predict))
 
 R2.numer <- 1 - sum((predictions[what.to.predict] - movies_UI_test[what.to.predict])**2)
 R2.denom <- sum((movies_UI_test[what.to.predict] - mean(movies_UI_test[what.to.predict]))**2)
@@ -274,8 +293,9 @@ library(matrixStats)
 The E-step computation is slightly more tricky, as we are not using all the gammas. So first, by the same reasoning as we had previously, we only need to compute the numerator (the denominator is a normalization constant, and we can just compute that as the sum of the numerator afterwards). Now in the formula we have for each fixed i that we are looping over movies j and only looking at the gamma that corresponds to the actual rating r_{i, j}, so we have to index over gamma to produce the correct array (using r_{i,j}). Once we have the array, we can then sum over the appropriate log gammas.
 
 ```{r}
+load(file = "../data/movie_UI.RData")
 mov.train <- movie_UI # to clarify that this is training data, Note: the unrated user-movie combos are NA's
-data <- movie_UI # subset for speed (until finished)
+data <- movie_UI[1:500,] # subset for speed (until finished)
 
 EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){ 
   
@@ -290,8 +310,8 @@ EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){
   
   #users <- rownames(data)
   #items <- colnames(data) # used items as a generic for both movies and vroots
-  mu <- matrix(1/C, nrow = C) # vector length C
-  gamma <- array(1/6, dim = c(k, C, n.items)) # dims = ratings, items(movies), clusters
+  mu <- rep(1/C, C) # vector length C
+  gamma <- array(1/k, dim = c(k, n.items, C)) # dims = ratings, items(movies), clusters
   #aic <- matrix(1/6, nrow = n_users, ncol = C) # cluster assignment/probability matrix, dims = users, clusters
   #gamma.norm <- gamma/mean(gamma)
   iter <- 1
@@ -315,7 +335,7 @@ EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){
       }
 
       aic[i, ] <- aic.numer[i, ]/sum(aic.numer[i, ]) # for each i, the denominator should be the same. 
-      return(aic)
+      #return(aic)
     }
     
     ## M-step 

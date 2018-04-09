@@ -35,6 +35,9 @@ load(file = "../data/movie_pred.RData")
 
 #### Spearman's correlation
 ```{r}
+MS_train <- MS_UI
+Movie_train <- movie_UI 
+
 
 ```
 
@@ -77,21 +80,34 @@ E-step: $aic := log(\hat{\mu}) + \sum log(\gamma) - log(\sum e^{log (\mu) + \sum
 M-step: $\hat{\mu}_c = \frac{1}{N} \sum_{i = 1}^N a_{ic} \text{for} c = 1, 2, ... , C$  
 $\hat{gamma}_{c,j}^{k} = \frac{\sum_{i|j \in I(i)} a_{ic}(r_{i,j} = k})}{\sum_{i|j \in I(i)} a_{ic}} \text{for } c, j, k$. 
 ```{r}
-movie_predict <- EM_train(movie_UI, k = 6, C = 12) # change number of clusters ???? 
-MS_predict <- EM_train(MS_UI, k = 1, C = 3)
+## Initialize parameters
+
+
+## E-step
+
+
+## M-step
 ```
 
-### Step 2: Predict ratings
+
+### Step 2: Cross validation to choose the best number of clusters
 ```{r}
-for (j in 1:n.items) {
-mov.train[, j] <- bayesian_predict(mov.train, hard.assignments = hard.assignments, gamma = gamma)
-}
+
 ```
 
+
+### Step 3: Predict ratings
+```{r}
+
+```
+
+<<<<<<< HEAD
 ### Step 3: Calculate test error
-```{r}
-what.to.predict <- which(!is.na(movies_UI_test)) # only select where movie_UI_test has rankings
+=======
 
-(mae <- sum(abs(predictions[what.to.predict] - movie_UI_test[what.to.predict]))/length(what.to.predict)) # movie_UI_predicted is the predicted data 
+### Step 4: Calculate test error
+>>>>>>> 61a4ead2b7071ce53d32c63cc038e8732da228ac
+```{r}
+
 ```
 
