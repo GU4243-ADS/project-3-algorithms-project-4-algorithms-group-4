@@ -145,12 +145,12 @@ meanSquareDiff <- function(df){
 }
 
 weights_MSD_train_MS <- meanSquareDiff(MS_train)
-saveRDS(weights_MSD_train_MS, file = "../output/weights_MSD_train_MS.RData")
-write.csv(weights_MSD_train_MS, file='../output/weights_MSD_train_MS.csv', row.names = TRUE)
+#saveRDS(weights_MSD_train_MS, file = "../output/weights_MSD_train_MS.RData")
+#write.csv(weights_MSD_train_MS, file='../output/weights_MSD_train_MS.csv', row.names = TRUE)
 
 weights_MSD_train_Movie <- meanSquareDiff(Movie_train)
-saveRDS(weights_MSD_train_Movie, file = "../output/weights_MSD_train_Movie.RData")
-write.csv(weights_MSD_train_Movie, file='../output/weights_MSD_train_Movie.csv', row.names = TRUE)
+#saveRDS(weights_MSD_train_Movie, file = "../output/weights_MSD_train_Movie.RData")
+#write.csv(weights_MSD_train_Movie, file='../output/weights_MSD_train_Movie.csv', row.names = TRUE)
 
 
 train_end <- Sys.time()
@@ -332,9 +332,9 @@ if(model.sim.rank){
   
   colnames(user_sim) <- users
   user_sim <- cbind(users, user_sim)
-  write.csv(user_sim, file='../output/usersim.csv', row.names = FALSE)
+ # write.csv(user_sim, file='../output/usersim.csv', row.names = FALSE)
   #Save files to data directory
-  save(weights_usersim_train_Movie, file = "../output/weights_usersim_train_Movie.Rdata")
+ # save(weights_usersim_train_Movie, file = "../output/weights_usersim_train_Movie.Rdata")
   
 }
 

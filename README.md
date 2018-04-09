@@ -10,12 +10,12 @@
 
 Term: Spring 2018
 
-+ Project title: [a title]
-+ Team Number: [a number]
-+ Team Members: [a list of team members]
++ Project title: Collaborative Filtering
++ Team Number: Group 4
++ Team Members: Noah Chasek-Macfoy, Judy Jinhui Cheng, Mingyue Kong, Yun Li, Nicole Smith
 + Project summary: [a short summary] 
 
-Contribution statement: [default](doc/a_note_on_contributions.md) All team members contributed equally in all stages of this project. All team members approve our work presented in this GitHub repository including this contributions statement.
+Contribution statement: [default]Mingyue and Yun completed the memory model, and Mingyue wrote the ranking score evaluation. Judy did the neighborhood selection model on Pearson correlations. Noah and Nicole worked on the EM algorithm. More spefically, Nicole and Noah tag-teamed the E-step and the Bayesian prediction function. Noah wrote the M-step and Nicole worked on the mean absolute error. Nicole annotated the main.Rmd and the readme files on Github. All team members contributed to the GitHub repository and prepared the presentation. All team members approve our work presented in our GitHub repository including this contribution statement.
 
 Following [suggestions](http://nicercode.github.io/blog/2013-04-05-projects/) by [RICH FITZJOHN](http://nicercode.github.io/about/#Team) (@richfitz). This folder is orgarnized as follows.
 
