@@ -1,4 +1,6 @@
+# Functions from Memory-Based
 
+# Functions from Neighboring
 
 
 EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 1000){ 
@@ -83,3 +85,8 @@ EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 1000){
     
     return(list("hard.assignments" = hard.assignments, "gamma" = gamma, "mu" = mu))
 }
+
+
+
+
+# Functions for predicting

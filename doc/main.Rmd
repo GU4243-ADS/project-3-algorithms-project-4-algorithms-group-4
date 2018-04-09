@@ -72,6 +72,10 @@ load(file = "../data/movie_pred.RData")
 ## Task: Model Based Collaborative Filtering
 
 ### Step 1: Build EM algorithm 
+E-step: $aic := log(\hat{\mu}) + \sum log(\gamma) - log(\sum e^{log (\mu) + \sum log (\gamma)})$
+
+M-step: $\hat{\mu}_c = \frac{1}{N} \sum_{i = 1}^N a_{ic} \text{for} c = 1, 2, ... , C$  
+$\hat{gamma}_{c,j}^{k} = \frac{\sum_{i|j \in I(i)} a_{ic}(r_{i,j} = k})}{\sum_{i|j \in I(i)} a_{ic}} \text{for } c, j, k$. 
 ```{r}
 movie_predict <- EM_train(movie_UI, k = 6, C = 12) # change number of clusters ???? 
 MS_predict <- EM_train(MS_UI, k = 1, C = 3)
@@ -83,7 +87,6 @@ for (j in 1:n.items) {
 mov.train[, j] <- bayesian_predict(mov.train, hard.assignments = hard.assignments, gamma = gamma)
 }
 ```
-
 
 ### Step 3: Calculate test error
 ```{r}
