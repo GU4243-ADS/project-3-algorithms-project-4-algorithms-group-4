@@ -107,7 +107,7 @@ weights_usersim_train_Movie <- load(file = "../output/weights_usersim_train_Movi
 ```{r}
 # pearson
 # pred_web_pearson <- pred_matrix(MS_UI, web_pearson)
-load()
+pred_web_pearson <- readRDS(file = "../output/pred_web_pearson.RData")
 # pred_movie_pearson <- pred_matrix(movie_UI, movie_pearson)
 load()
 
@@ -119,13 +119,13 @@ load()
 
 #vector (cosine)
 # pred_web_vector <- pred_matrix(MS_UI, web_vector)
-load("..output/pred_web_vector.Rdata")
+load("../output/pred_web_vector.Rdata")
 # pred_movie_vector <- pred_matrix(movie_UI, movie_vector)
 load()
 
 #meansquare
 # pred_web_meansquare <- pred_matrix(MS_UI, weights_MSD_train_MS)
-load(file ="../output/weights_MSD_train_MS_pred.RData")
+load("../output/pred_web_meansquare.Rdata")
 # pred_movie_meansquare <- pred_matrix(movie_UI, weights_MSD_train_Movie)
 load(file = "../output/weights_MSD_train_Movie_pred.RData")
 
@@ -141,6 +141,7 @@ rankscore_web_pearson <- rank_scoring(pred_web_pearson, MS_UI_test, 5)
 rankscore_web_spearman <- rank_scoring(pred_web_spearman, MS_UI_test, 5)
 rankscore_web_vector <- rank_scoring(pred_web_vector, MS_UI_test, 5)
 rankscore_web_meansquare <- rank_scoring(pred_web_meansquare, MS_UI_test, 5)
+rankscore_web_simrank <- rank_scoring(xxx, MS_UI_test, 5)
 ```
 
 ### Evaluation: MAE for Movie Data
