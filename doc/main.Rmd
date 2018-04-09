@@ -19,15 +19,14 @@ have <- intersect(installed.packages()[,1], c("matrixStats"))
 need <- setdiff(c("matrixStats"), have)
 install.packages(need)
 
-
 load(file = "../data/MS_UI.RData")
 load(file = "../data/movie_UI.RData")
-=======
+
 # movie_train <- read.csv("../data/eachmovie_sample/data_train.csv")
 # movie_test <- read.csv("../data/eachmovie_sample/data_test.csv")
 # MS_train <- read.csv("../data/MS_sample/data_train.csv")
 # MS_test <- read.csv("../data/MS_sample/data_test.csv")
->>>>>>> cdef812b51b5e45adf17e710a5296a79f405dc74
+
 ```
 
 #### Transformation
