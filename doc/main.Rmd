@@ -22,61 +22,118 @@ install.packages(need)
 
 load(file = "../data/MS_UI.RData")
 load(file = "../data/movie_UI.RData")
+=======
+# movie_train <- read.csv("../data/eachmovie_sample/data_train.csv")
+# movie_test <- read.csv("../data/eachmovie_sample/data_test.csv")
+# MS_train <- read.csv("../data/MS_sample/data_train.csv")
+# MS_test <- read.csv("../data/MS_sample/data_test.csv")
+>>>>>>> cdef812b51b5e45adf17e710a5296a79f405dc74
 ```
 
+#### Transformation
+Convert the original dataset to a matrix which rows represents users and columns represents items
+
+```{r}
+# movie_UI <- movie_data_transform(movie_train)
+# movie_test <- movie_data_transform(movie_test)
+
+# MS_UI <- MS_data_transform(MS_train)
+# MS_test <- MS_data_transform(MS_test)
+
+load(file ="../data/MS_UI.RData")
+load(file ="../data/MS_test.RData")
+load(file ="../data/movie_UI.RData")
+load(file ="../data/movie_test.RData")
+```
 
 ## Task: Memory Based Collaborative Filtering
 
-### Comparing different similarity weights
+### Calculate similarity weights 
 #### Pearson correlation
 ```{r}
 # Weights
-load(file = "../data/MS_sim.RData")
-load(file = "../data/movie_sim.RData")
+# web_pearson <- all_weight(MS_UI, 'pearson')
+# movie_pearson <- all_weight(movie_UI, 'pearson')
 
-# Predictions
-load(file ="../data/MS_pred.RData")
-load(file = "../data/movie_pred.RData")
+web_pearson <- readRDS(file = "../output/web_pearson.RData")
+movie_pearson <- readRDS(file = "../output/movie_pearson.RData")
 ```
 
 #### Spearman's correlation
 ```{r}
-MS_train <- MS_UI
-Movie_train <- movie_UI 
+# Weights
+# web_spearman <- all_weight(MS_UI, 'spearman')
+# movie_spearman <- all_weight(movie_UI, 'spearman')
 
-
+web_spearman <- readRDS(file = "../output/web_spearman.RData")
+movie_spearman <- readRDS(file = "../output/movie_spearman.RData")
 ```
 
 #### Vector similarity
 ```{r}
+# Weights
+# web_vector <- all_weight(MS_UI, 'vector')
+# movie_vector <- all_weight(movie_UI, 'vector')
 
+web_vector <- readRDS(file = "../output/web_vector.RData")
+movie_vector <- readRDS(file = "../output/movie_vector.RData")
 ```
-
-
-#### Entropy
-```{r}
-
-```
-
 
 #### Mean-Square Difference
 ```{r}
+# Weights
+# weights_MSD_train_MS <- meanSquareDiff(MS_train)
+# weights_MSD_train_Movie <- meanSquareDiff(Movie_train)
 
+weights_MSD_train_MS <- readRDS(file = "../output/weights_MSD_train_MS.RData")
+weights_MSD_train_Movie <- readRDS(file = "../output/weights_MSD_train_Movie.RData") waiting!!!
 ```
 
 
 #### SimRank
 ```{r}
+# Weights
+# weights_usersim_train_Movie <- simrank(movie_UI)
 
+weights_usersim_train_Movie <- load(file = "../output/weights_usersim_train_Movie.RData") waiting!!!
 ```
 
+### Prediction for each weight similarity
+
+```{r}
+# pearson
+# pred_web_pearson <- pred_matrix(MS_UI, web_pearson)
+load()
+# pred_movie_pearson <- pred_matrix(movie_UI, movie_pearson)
+load()
+
+#spearman
+# pred_web_spearman <- pred_matrix(MS_UI, web_spearman)
+load()
+# pred_movie_spearman <- pred_matrix(movie_UI, movie_spearman)
+load()
+
+#vector (cosine)
+# pred_web_vector <- pred_matrix(MS_UI, web_vector)
+load()
+# pred_movie_vector <- pred_matrix(movie_UI, movie_vector)
+load()
+
+#meansquare
+# pred_web_meansquare <- pred_matrix(MS_UI, weights_MSD_train_MS)
+load(file ="../output/weights_MSD_train_MS_pred.RData")
+# pred_movie_meansquare <- pred_matrix(movie_UI, weights_MSD_train_Movie)
+load(file = "../output/weights_MSD_train_Movie_pred.RData")
+
+# Predictions
+# pred_movie_simrank <- pred_matrix(movie_UI, weights_usersim_train_Movie)
+load(file = "../output/weights_usersim_train_Movie_pred.RData")
+```
 
 ## Task: Group 4 Specific Assignment - Neighbors 
 ```{r}
 
 ```
-
-
 
 ## Task: Model Based Collaborative Filtering
 
