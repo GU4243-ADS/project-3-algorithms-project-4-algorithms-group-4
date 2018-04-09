@@ -10,13 +10,14 @@ Try executing this chunk by clicking the *Run* button within the chunk or by pla
 ```{r}
 setwd("/Users/yunli/Documents/GitHub/project-3-algorithms-project-4-algorithms-group-4/")
 
-load(file = "../data/MS_UI.RData")
-load(file = "../data/movie_UI.RData")
+load(file = "/Users/yunli/Documents/GitHub/project-3-algorithms-project-4-algorithms-group-4/data/MS_UI.RData")
+load(file = "/Users/yunli/Documents/GitHub/project-3-algorithms-project-4-algorithms-group-4/data/movie_UI.RData")
 
-MS_train <- MS_UI#need to seperate into train data and test data
+MS_train <- MS_UI[1:4151,]#need to seperate into train data and test data
 
 
-Movie_train <- movie_UI
+Movie_train <- movie_UI[1:5055, ]
+# Movie_train1 <- movie_UI[1:500, ]
 
 ```
 
@@ -86,7 +87,8 @@ if (read.movie.data){
   #Read dataset from directory
   movie.data.train <- read.csv("../data/eachmovie_sample/data_train.csv")
   movie.data.test <- read.csv("../data/eachmovie_sample/data_test.csv")
-  # movie.data.train <- movie.data.train[1:1855,]#it needs too long to train the model. So I used small dataset to test first.
+  # movie.data.train <- movie.data.train[1:1855,]
+  
   movie.data.train <- movie.data.train[,-1]
   movie.data.test <- movie.data.test[,-1]
   
@@ -292,7 +294,7 @@ Implement SimRank
 
 ```{r}
 if(model.sim.rank){
-  graph <- movie.data.train[1:5055, 1:5055]
+  graph <- movie.data.train[1:1000, ]#[1:5055, 1:1620]
 
 graph[is.na(graph)] <- 0
 
