@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### Step 0: Load Data
 ```{r}
-# setwd("/Users/Nicole/Documents/GitHub/project-3-algorithms-project-4-algorithms-group-4/doc")
+setwd("/Users/Nicole/Documents/GitHub/project-3-algorithms-project-4-algorithms-group-4/doc")
 # Change working directory 
 
 packages.used <- c("matrixStats")
@@ -29,8 +29,6 @@ if(length(packages.needed) > 0) {
 # MS_train <- read.csv("../data/MS_sample/data_train.csv")
 # MS_test <- read.csv("../data/MS_sample/data_test.csv")
 
-
-source("../lib/functions.R")
 ```
 
 #### Transformation
@@ -48,6 +46,8 @@ load(file ="../data/MS_UI.RData")
 load(file ="../data/MS_test.RData")
 load(file ="../data/movie_UI.RData")
 load(file ="../data/movie_test.RData")
+
+source("../lib/functions.R")
 ```
 
 ## Task: Memory Based Collaborative Filtering
@@ -147,9 +147,16 @@ rankscore_web_meansquare <- rank_scoring(pred_web_meansquare, MS_UI_test, 5)
 
 ```{r}
 mae_movie_pearson <- mae(movie_UI_test, pred_movie_pearson)
+(mae_mov_pearson <- rowSums(mae_movie_pearson)/length(mae_movie_pearson))
+
 mae_movie_spearman <- mae(movie_UI_test, pred_movie_spearman)
+(mae_mov_spearman <- rowSums(mae_movie_spearman)/length(mae_movie_spearman))
+
 mae_movie_vector <- mae(movie_UI_test, pred_movie_vector)
+(mae_mov_vector <- rowSums(mae_movie_vector)/length(mae_movie_vector))
+
 mae_movie_meansquare <- mae(movie_UI_test, pred_movie_meansquare)
+(mae_mov_meansquare <- rowSums(mae_movie_meansquare)/length(mae_movie_meansquare))
 ```
 
 
@@ -282,7 +289,10 @@ MS_predict <- bayesian_predict(MS_UI_test, MS_result$hard.assignments, MS_result
 
 ### Step 3: Calculate test error
 ```{r}
-movie_error <- mae(movie_UI_test, movie_predict) # change to name of predictions from EM algorithm
+
+movie_error <- mae(movie_UI_test, test) 
+(movie_error <- rowSums(movie_error)/length(movie_error))
+
 MS_error <- rank_scoring(MS_predict, MS_UI_test, 5)
 
 ```
