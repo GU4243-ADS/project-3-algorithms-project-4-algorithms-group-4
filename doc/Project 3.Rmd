@@ -184,21 +184,28 @@ EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){
 
 ### Predict function
 ```{r}
+load(file = "../data/movie_UI.RData")
+mov.train <- movie_UI # to clarify that this is training data, Note: the unrated user-movie combos are NA's
+data <- mov.train[1:500, ]
 
 ###########
 ### Inputs:
-# active.users = the test data user-item matrix
-# hard.assignments = the hard.assignments output from the EM_train func
+# active.users = the test data user-item matrix. dims = users, item 
+# hard.assignments = the hard.assignments output from the EM_train func. dims = users, clusters
+# gamma = final gamma matrix from the EM_train func. dims = ratings, items, clusters
+# k = number of ratings in the data set (EachMovie = 6, MS = ?)
+### Outputs: complete matrix of prodictions dims = dims of the active.users matrix 
 
   hard.assignments <- matrix(0, nrow = n.users, ncol = C)
   hard.assignments[, 5] <- rep(1, n.users)
 
 
-bayesian_predict <-function(data, j,  hard.assignments, gamma){
+bayesian_predict <-function(active.users,  hard.assignments, gamma, k){
   n.users <- dim(data)[1]
+  n.items <- dim(data)[2]
 
 
-  predict.rank <- matrix(0, nrow = n.users)
+  predict.rank <- matrix(0, nrow = n.users, ncol = )
     for (k in 1:6){
       predict.rank <- predict.rank + k * hard.assignments %*% gamma[C, , k] 
     }
@@ -211,6 +218,7 @@ for (j in 1:n.items) {
 mov.train[, j] <- bayesian_predict(mov.train, j, hard.assignments, gamma)
 }
 # says items are not of the same length -- confused mov.train[, j] has length 5055 and length(predict.rank) = 5055
+
 ```
 
 Notes to make predictions from EM: 
