@@ -99,13 +99,13 @@ load()
 
 #spearman
 # pred_web_spearman <- pred_matrix(MS_UI, web_spearman)
-load()
+load("../output/pred_web_spearman.Rdata")
 # pred_movie_spearman <- pred_matrix(movie_UI, movie_spearman)
 load()
 
 #vector (cosine)
 # pred_web_vector <- pred_matrix(MS_UI, web_vector)
-load()
+load("..output/pred_web_vector.Rdata")
 # pred_movie_vector <- pred_matrix(movie_UI, movie_vector)
 load()
 
@@ -119,6 +119,33 @@ load(file = "../output/weights_MSD_train_Movie_pred.RData")
 # pred_movie_simrank <- pred_matrix(movie_UI, weights_usersim_train_Movie)
 load(file = "../output/weights_usersim_train_Movie_pred.RData")
 ```
+
+### Evaluation: Rank Score for MS Data
+
+```{r}
+rankscore_web_pearson <- rank_scoring(pred_web_pearson, MS_UI_test, 5)
+rankscore_web_spearman <- rank_scoring(pred_web_spearman, MS_UI_test, 5)
+rankscore_web_vector <- rank_scoring(pred_web_vector, MS_UI_test, 5)
+rankscore_web_meansquare <- rank_scoring(pred_web_meansquare, MS_UI_test, 5)
+```
+
+### Evaluation: MAE for Movie Data
+
+```{r}
+# Pearson
+what.to.predict <- which(!is.na(movie_UI_test))
+
+(mse <- sum((pred_movie_pearson[what.to.predict] - movie_UI_test[what.to.predict])**2)/length(what.to.predict))
+(mae <- sum(abs(pred_movie_pearson[what.to.predict] - movie_UI_test[what.to.predict]))/length(what.to.predict))
+
+R2.numer <- 1 - sum((pred_movie_pearson[what.to.predict] - movie_UI_test[what.to.predict])**2)
+R2.denom <- sum((movie_UI_test[what.to.predict] - mean(movie_UI_test[what.to.predict]))**2)
+
+(R2 <- R2.numer/R2.denom)
+
+#
+```
+
 
 ## Task: Group 4 Specific Assignment - Neighbors 
 ```{r}
