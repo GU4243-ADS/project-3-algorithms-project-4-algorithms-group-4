@@ -14,7 +14,7 @@ EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 1000){
   
   iter <- 1
   
-  aic.numer <- matrix(NA, nrow = n.users, n.col = C)
+  aic.numer <- matrix(NA, nrow = n.users, ncol = C)
   aic <- matrix(NA, nrow = n.users, ncol = C) 
   
   gamma <- gamma/mean(gamma) # normalize gamma to avoid underflow 
