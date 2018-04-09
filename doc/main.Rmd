@@ -47,21 +47,25 @@ Movie_train <- movie_UI
 ```
 
 
-#### Entropy
-```{r}
-
-```
-
-
 #### Mean-Square Difference
 ```{r}
+# Weights
+load(file = "../output/weights_MSD_train_MS.RData")
+load(file = "../output/weights_MSD_train_Movie.RData")
 
+# Predictions
+load(file ="../output/weights_MSD_train_MS_pred.RData")
+load(file = "../output/weights_MSD_train_Movie_pred.RData")
 ```
 
 
 #### SimRank
 ```{r}
+# Weights
+load(file = "../output/weights_usersim_train_Movie.RData")
 
+# Predictions
+load(file = "../output/weights_usersim_train_Movie_pred.RData")
 ```
 
 
