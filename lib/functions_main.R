@@ -218,6 +218,33 @@ if(model.sim.rank){
   
 }
 
+#Spearman+pearson+vector
+
+all_weight <- function(data,method){
+  library(lsa)
+  data <- as.matrix(data)
+  weight_mat <- matrix(NA,nrow=nrow(data),ncol=nrow(data))
+  for(i in 1:nrow(data)){
+    weight_mat[i,] <- apply(data,1,function(x){
+      index <- (!is.na(x))&(!is.na(data[i,]))
+      if(sum(index)==0){
+        return(0)
+      }else{
+        if(method == 'pearson'){
+          return(cor(data[i,index],x[index],method='pearson'))
+        }else if(method == 'spearman'){
+          return(cor(data[i,index],x[index],method='spearman'))
+        }else if(method == 'entropy'){
+          library(infoheo)
+          return(mutinformation(data[i,index],x[index],method='emp'))
+        }else if(method == 'vector'){
+          return(cosine(data[i,index],x[index]))
+        }
+      }
+    })
+  }
+  return(round(weight_mat,4))
+}
 
 # Functions from Neighboring
 
@@ -309,3 +336,65 @@ EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 1000){
 
 
 # Functions for predicting
+pred_matrix <- function(data, simweights) {
+  
+  ## Calculate prediction matrix
+  ##
+  ## input: data   - movie data or MS data in user-item matrix form
+  ##        simweights - a matrix of similarity weights
+  ##
+  ## output: prediction matrix
+  
+  # Initiate the prediction matrix.
+  pred_mat <- data
+  
+  # Change MS entries from 0 to NA
+  pred_mat[pred_mat == 0] <- NA
+  
+  row_avgs <- apply(data, 1, mean, na.rm = TRUE)
+  
+  for(i in 1:nrow(data)) {
+    
+    # Find columns we need to predict for user i and sim weights for user i
+    cols_to_predict <- which(is.na(pred_mat[i, ]))
+    num_cols        <- length(cols_to_predict)
+    neighb_weights  <- simweights[i, ]
+    
+    # Transform the UI matrix into a deviation matrix since we want to calculate
+    # weighted averages of the deviations
+    dev_mat     <- data - matrix(rep(row_avgs, ncol(data)), ncol = ncol(data))
+    weight_mat  <- matrix(rep(neighb_weights, ncol(data)), ncol = ncol(data))
+    
+    weight_sub <- weight_mat[, cols_to_predict]
+    dev_sub    <- dev_mat[ ,cols_to_predict]
+    
+    pred_mat[i, cols_to_predict] <- row_avgs[i] +  apply(dev_sub * weight_sub, 2, sum, na.rm = TRUE)/sum(neighb_weights, na.rm = TRUE)
+    print(i)
+  }
+  
+  return(pred_mat)
+}
+
+
+# Rank score
+rank_scoring <- function(predicted, web_mini_test, alpha){
+  
+  visited_ind <- apply(web_mini_test, 1, function(rrr){return(which(rrr==1))})
+  ord <- t(apply(predicted, 1, function(rrr){return(order(rrr,decreasing = T))})) 
+  R_a_s <- rep(NA, nrow(web_mini_test))
+  R_a_max <- rep(NA, nrow(web_mini_test))
+  
+  for(a in 1:nrow(web_mini_test)){
+    d<-mean(predicted[a,])
+    j<-ord[a,] 
+    m<-ifelse((predicted[a,]-d)>0,(predicted[a,]-d),0)
+    
+    R_a_s[a] <- sum( m / 2^((j-1)/(alpha-1)) )
+    R_a_max[a] <- length(visited_ind[[a]])
+  }
+  
+  
+  R <- sum(R_a_s) / sum(R_a_max)*100
+  return(R)
+}
+
