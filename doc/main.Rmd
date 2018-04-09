@@ -146,6 +146,7 @@ rankscore_web_meansquare <- rank_scoring(pred_web_meansquare, MS_UI_test, 5)
 ### Evaluation: MAE for Movie Data
 
 ```{r}
+# Use the mean absolute error for the predictions on movie data
 mae_movie_pearson <- mae(movie_UI_test, pred_movie_pearson)
 (mae_mov_pearson <- rowSums(mae_movie_pearson)/length(mae_movie_pearson))
 
@@ -173,7 +174,6 @@ MS_threshold_time<-c() #MS threshold
 
 #do the initial matrix preparation common to both methods of neighborhood selection
 #pred_initial(MS_UI)
-
 
 ####method 1:top n neighbors####
 #total number of neighbors
