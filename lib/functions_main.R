@@ -1,5 +1,7 @@
 
-EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){ 
+
+
+EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 1000){ 
   library(matrixStats) # call library for matrix algebra
   
   n.users <- dim(data)[1]

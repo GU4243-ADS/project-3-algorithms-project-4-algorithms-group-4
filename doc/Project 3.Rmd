@@ -224,7 +224,8 @@ Predict rank function:
 what.to.predict <- which(!is.na(movies_UI_test))
 
 (mse <- sum((predictions[what.to.predict] - movie_UI_test[what.to.predict])**2)/length(what.to.predict))
-(mae <- sum(abs(predictions[what.to.predict] - movie_UI_test[what.to.predict]))/length(what.to.predict))
+
+(mae <- sum(abs(predictions[what.to.predict] - movie_UI_test[what.to.predict]))/length(what.to.predict)) # movie_UI_predicted is the predicted data 
 
 R2.numer <- 1 - sum((predictions[what.to.predict] - movies_UI_test[what.to.predict])**2)
 R2.denom <- sum((movies_UI_test[what.to.predict] - mean(movies_UI_test[what.to.predict]))**2)

@@ -35,9 +35,6 @@ load(file = "../data/movie_pred.RData")
 
 #### Spearman's correlation
 ```{r}
-MS_train <- MS_UI
-Movie_train <- movie_UI 
-
 
 ```
 
@@ -76,30 +73,22 @@ Movie_train <- movie_UI
 
 ### Step 1: Build EM algorithm 
 ```{r}
-## Initialize parameters
+movie_predict <- EM_train(movie_UI, k = 6, C = 12) # change number of clusters ???? 
+MS_predict <- EM_train(MS_UI, k = 1, C = 3)
+```
 
-
-## E-step
-
-
-## M-step
+### Step 2: Predict ratings
+```{r}
+for (j in 1:n.items) {
+mov.train[, j] <- bayesian_predict(mov.train, hard.assignments = hard.assignments, gamma = gamma)
+}
 ```
 
 
-### Step 2: Cross validation to choose the best number of clusters
+### Step 3: Calculate test error
 ```{r}
+what.to.predict <- which(!is.na(movies_UI_test)) # only select where movie_UI_test has rankings
 
-```
-
-
-### Step 3: Predict ratings
-```{r}
-
-```
-
-
-### Step 4: Calculate test error
-```{r}
-
+(mae <- sum(abs(predictions[what.to.predict] - movie_UI_test[what.to.predict]))/length(what.to.predict)) # movie_UI_predicted is the predicted data 
 ```
 
