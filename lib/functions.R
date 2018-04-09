@@ -1,8 +1,8 @@
 ###################################################################
-### Memory-based Collaborative Filtering Algorithm Starter Code ###
+### Memory-based Collaborative Filtering Algorithm ###
 ###################################################################
 
-### Authors: CIndy Rush
+### Authors: Group 4
 ### Project 3
 ### ADS Spring 2018
 
@@ -170,3 +170,30 @@ pred_matrix <- function(data, simweights) {
   return(pred_mat)
 }
 
+
+
+
+
+
+
+####################################################
+## Mean absolute error
+####################################################
+
+mae <-function(data_test, predictions_test) {
+  
+  n.items <- dim(data_test)[2]
+  mae <- matrix(NA, nrow = 1, ncol = n.items)
+  
+  for (i in 1:n.items){
+    what.to.predict<- which(!is.na(data_test[,i]))
+    
+    predictions <- predictions_test[what.to.predict]
+    test.data <- data_test[what.to.predict]
+    
+    difference <- abs(predictions - test.data)
+    mae[,i] <- sum(difference, na.rm = TRUE)/length(what.to.predict)
+    
+    return(mae)
+  }
+}

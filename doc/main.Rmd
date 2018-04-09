@@ -14,19 +14,23 @@ knitr::opts_chunk$set(echo = TRUE)
 # setwd("/Users/Nicole/Documents/GitHub/project-3-algorithms-project-4-algorithms-group-4/doc")
 # Change working directory 
 
+packages.used <- c("matrixStats")
 
-have <- intersect(installed.packages()[,1], c("matrixStats"))
-need <- setdiff(c("matrixStats"), have)
-install.packages(need)
+# check packages that need to be installed.
+packages.needed <- setdiff(packages.used, intersect(installed.packages()[,1], packages.used))
 
-load(file = "../data/MS_UI.RData")
-load(file = "../data/movie_UI.RData")
+# install additional packages
+if(length(packages.needed) > 0) {
+  install.packages(packages.needed, dependencies = TRUE, repos = 'http://cran.us.r-project.org')
+}
 
 # movie_train <- read.csv("../data/eachmovie_sample/data_train.csv")
 # movie_test <- read.csv("../data/eachmovie_sample/data_test.csv")
 # MS_train <- read.csv("../data/MS_sample/data_train.csv")
 # MS_test <- read.csv("../data/MS_sample/data_test.csv")
 
+
+source("../lib/functions.R")
 ```
 
 #### Transformation
@@ -39,6 +43,7 @@ Convert the original dataset to a matrix which rows represents users and columns
 # MS_UI <- MS_data_transform(MS_train)
 # MS_test <- MS_data_transform(MS_test)
 
+# Load in the training and test data
 load(file ="../data/MS_UI.RData")
 load(file ="../data/MS_test.RData")
 load(file ="../data/movie_UI.RData")
@@ -141,22 +146,16 @@ rankscore_web_meansquare <- rank_scoring(pred_web_meansquare, MS_UI_test, 5)
 ### Evaluation: MAE for Movie Data
 
 ```{r}
-# Pearson
-what.to.predict <- which(!is.na(movie_UI_test))
-
-(mse <- sum((pred_movie_pearson[what.to.predict] - movie_UI_test[what.to.predict])**2)/length(what.to.predict))
-(mae <- sum(abs(pred_movie_pearson[what.to.predict] - movie_UI_test[what.to.predict]))/length(what.to.predict))
-
-R2.numer <- 1 - sum((pred_movie_pearson[what.to.predict] - movie_UI_test[what.to.predict])**2)
-R2.denom <- sum((movie_UI_test[what.to.predict] - mean(movie_UI_test[what.to.predict]))**2)
-
-(R2 <- R2.numer/R2.denom)
-
-#
+mae_movie_pearson <- mae(movie_UI_test, pred_movie_pearson)
+mae_movie_spearman <- mae(movie_UI_test, pred_movie_spearman)
+mae_movie_vector <- mae(movie_UI_test, pred_movie_vector)
+mae_movie_meansquare <- mae(movie_UI_test, pred_movie_meansquare)
 ```
 
 
+
 ## Task: Group 4 Specific Assignment - Neighbors 
+Neighbors: Determine which other users' data to be used in the prediction for a user. There are two methods for finding neighbors, which improve accuracy and computational time, (1) correlation threshold and (2) top \textit{n} neighbors. 
 ```{r}
 
 ```
@@ -168,35 +167,23 @@ E-step: $aic := log(\hat{\mu}) + \sum log(\gamma) - log(\sum e^{log (\mu) + \sum
 
 M-step: $\hat{\mu}_c = \frac{1}{N} \sum_{i = 1}^N a_{ic} \text{for} c = 1, 2, ... , C$  
 $\hat{gamma}_{c,j}^{k} = \frac{\sum_{i|j \in I(i)} a_{ic}(r_{i,j} = k})}{\sum_{i|j \in I(i)} a_{ic}} \text{for } c, j, k$. 
+
+Iterate through the E & M steps until convergence (either $\tau = 0.01$ or after 750 iterations). 
 ```{r}
-## Initialize parameters
-
-
-## E-step
-
-
-## M-step
+system.time(movie_result <- EM_train(movie_UI, k = 6, C = 10, ITER = 750))
+system.time(MS_result <- EM_train(MS_UI, k = 1, C = 10, ITER = 750))
 ```
 
-
-### Step 2: Cross validation to choose the best number of clusters
+### Step 2: Predict ratings
 ```{r}
-
+movie_predict <- bayesian_predict(movie_UI_test, movie_result$hard.assignments, movie_result$gamma, k = 6)
+MS_predict <- bayesian_predict(MS_UI_test, MS_result$hard.assignments, MS_results$gamma, k = 1)
 ```
 
-
-### Step 3: Predict ratings
-```{r}
-
-```
-
-<<<<<<< HEAD
 ### Step 3: Calculate test error
-=======
-
-### Step 4: Calculate test error
->>>>>>> 61a4ead2b7071ce53d32c63cc038e8732da228ac
 ```{r}
+movie_error <- mae(movie_UI_test, movie_predict) # change to name of predictions from EM algorithm
+MS_error <- rank_scoring(MS_predict, MS_UI_test, 5)
 
 ```
 
