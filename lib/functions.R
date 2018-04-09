@@ -424,8 +424,8 @@ mae <-function(data_test, predictions_test) {
     difference <- abs(predictions - test.data)
     mae[,i] <- sum(difference, na.rm = TRUE)/length(what.to.predict)
     
-    return(mae)
   }
+    return(mae)
 }
 
 
