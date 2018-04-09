@@ -19,6 +19,7 @@ Term: Spring 2018
 #### Memory-based Algorithm 
 
 ##### Description
+Using different similarity weights, the memory based model compares all users to all other users. It is essential to use different similarity weights and various measures of correlation compute different things. For example, Pearson correlation measures a linear relationship, whereas Spearman correlation is monotonic. 
 
 ##### Results
 | | | Pearson | Spearman | Vector | Mean Square | Sim Rank | 
@@ -30,20 +31,25 @@ Run Time| Movie| 1.75H|2.28H|1.5H|N/A|8.5H
 
 
 ##### Selecting Neighbors
+After selecting a neighborhoods, we combine ratings to make a prediction. 
 |	| Correlation Threshold | Top-N-Neighbors| Computational Time |
 --- | :---: |	:---: | ---
-Neighbors (Pearson)| 	|	|
+10%| 	|	| 33 minutes
+30% | 	|	| 38 minutes
+50% |	|	| 43 minutes
+70% |	|	| 53 minutes
 
 
 #### Model-based Algorithm
 
 ##### Description
+The EM algorithm uses clusters to predict the ranks within a cluster. For example, can we group users who rate some movies similarily into a single cluster and predict the outcome of that cluster? Unlike the memory-based approach, the model-based approach is less computationally taxing as one only needs to store the cluster information rather than entire dataset. 
 
 ##### Results 
 |	| Test Error  | Computational Time |
  ---|:---: | ---
 | Movie | (MAE)	| |
-| website | (Rank score)| 13.23 minutes| 
+| website | (Rank score)| | 
 
 
 Contribution statement: Mingyue and Yun completed the memory model and wrote the ranking score evaluation. More spefically, Yun developed Mean-square similarity and Simrank while Mingyue developed Pearson Correlation, Spearman Correlation and Vector Similarity. Mingyue and Yun generated predictions and evaluetions of these five similarity weights. Judy did the neighborhood selection model on Pearson correlations. Noah and Nicole worked on the EM algorithm. More spefically, Nicole and Noah tag-teamed the E-step and the Bayesian prediction function. Noah wrote the M-step and Nicole worked on the mean absolute error. Nicole annotated the main.Rmd and the readme files on Github. Yun made the powerpoint presentation. All team members contributed to the GitHub repository and prepared the presentation. All team members approve our work presented in our GitHub repository including this contribution statement.
