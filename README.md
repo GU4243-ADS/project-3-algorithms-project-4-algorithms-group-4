@@ -46,7 +46,7 @@ Neighbors (Pearson)| 	|	|
 | website | (Rank score)| 13.23 minutes| 
 
 
-Contribution statement: Mingyue and Yun completed the memory model, and Mingyue wrote the ranking score evaluation. Judy did the neighborhood selection model on Pearson correlations. Noah and Nicole worked on the EM algorithm. More spefically, Nicole and Noah tag-teamed the E-step and the Bayesian prediction function. Noah wrote the M-step and Nicole worked on the mean absolute error. Nicole annotated the main.Rmd and the readme files on Github. Yun made the powerpoint presentation. All team members contributed to the GitHub repository and prepared the presentation. All team members approve our work presented in our GitHub repository including this contribution statement.
+Contribution statement: Mingyue and Yun completed the memory model and wrote the ranking score evaluation. More spefically, Yun developed Mean-square similarity and Simrank while Mingyue developed Pearson Correlation, Spearman Correlation and Vector Similarity. Mingyue and Yun generated predictions and evaluetions of these five similarity weights. Judy did the neighborhood selection model on Pearson correlations. Noah and Nicole worked on the EM algorithm. More spefically, Nicole and Noah tag-teamed the E-step and the Bayesian prediction function. Noah wrote the M-step and Nicole worked on the mean absolute error. Nicole annotated the main.Rmd and the readme files on Github. Yun made the powerpoint presentation. All team members contributed to the GitHub repository and prepared the presentation. All team members approve our work presented in our GitHub repository including this contribution statement.
 
 #### References 
 
