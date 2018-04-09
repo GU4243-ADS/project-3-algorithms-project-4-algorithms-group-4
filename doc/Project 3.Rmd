@@ -71,8 +71,8 @@ E-step math: $aic := log(\hat{\mu}) + \sum log(\gamma) - log(\sum e^{log (\mu) +
 ```{r Model-Based Algorithm}
 load(file = "../data/movie_UI.RData")
 mov.train <- movie_UI # to clarify that this is training data, Note: the unrated user-movie combos are NA's
-#data <- mov.train[1:500, ] # subset for speed (until finished)
-data <- mov.train
+data <- mov.train[1:500, ] # subset for speed (until finished)
+#data <- mov.train
 
 EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){ 
   
@@ -158,6 +158,9 @@ EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){
   #result <- nominator/denominator # dims = movies, clusters, ratings
   result <- apply(numerator, 3, function(x) x/denominator) # divides each numerator element by its respective denominator value. apply() returns a weirdly shaped matrix again.
   gamma <- array(result, c(length(items), C, k)) # puts data in the correct shape. dims = (movies, clusters, ratings)
+  gamma <- aperm(gamma, c(3, 1, 2)) # dims = ratings, items, clusters
+  
+  
   #gamma
 #} # end of the diagnostic func
 #system.time(new <- gamma())
@@ -174,6 +177,7 @@ EM_train <- function(data, k, C = 5, tau = 0.01, ITER = 100){
   }
   
   ### Hard Assignment
+  library(matrixStats)
   hard.assignments <- (aic == rowMaxs(aic)) + 0 # I used a function from "MatrixsStats" library
   #hard.cluster <- apply(aic, 1, which.max) # hard cluster assignments
   return(list("aic" = aic, "gamma" = gamma, "mu" = mu))
@@ -198,15 +202,20 @@ data <- mov.train[1:500, ]
 
   hard.assignments <- matrix(0, nrow = n.users, ncol = C)
   hard.assignments[, 5] <- rep(1, n.users)
+  
+  test.aic
+  hard.assignments <- test.hard.assignments
+  gamma <- test.gamma
+  active.users <- data
+  k <- 6
 
-
-bayesian_predict <-function(active.users,  hard.assignments, gamma, k){
+bayesian_predict <-function(active.users, hard.assignments, gamma, k){
   n.users <- dim(data)[1]
   n.items <- dim(data)[2]
 
 
-  predict.rank <- matrix(0, nrow = n.users, ncol = )
-    for (k in 1:6){
+  predict.rank <- matrix(0, nrow = n.users, ncol = ) # creates our predicted ratings output function. dims = users, items
+    for (i in 1:k){
       predict.rank <- predict.rank + k * hard.assignments %*% gamma[C, , k] 
     }
   }
