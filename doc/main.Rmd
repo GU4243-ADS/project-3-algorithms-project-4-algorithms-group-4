@@ -90,16 +90,16 @@ movie_vector <- readRDS(file = "../output/movie_vector.RData")
 # weights_MSD_train_Movie <- meanSquareDiff(Movie_train)
 
 weights_MSD_train_MS <- readRDS(file = "../output/weights_MSD_train_MS.RData")
-weights_MSD_train_Movie <- readRDS(file = "../output/weights_MSD_train_Movie.RData") waiting!!!
+weights_MSD_train_Movie <- readRDS(file = "../output/weights_MSD_train_Movie.RData")
 ```
 
 
 #### SimRank
 ```{r}
 # Weights
-# weights_usersim_train_Movie <- simrank(movie_UI)
+# movie_simrank <- simrank(movie_UI) #for shorter computing time, we used first 1000 rows
 
-weights_usersim_train_Movie <- load(file = "../output/weights_usersim_train_Movie.RData") waiting!!!
+movie_simrank <- load(file = "../output/usersim.RData")
 ```
 
 ### Prediction for each weight similarity
@@ -127,11 +127,11 @@ load()
 # pred_web_meansquare <- pred_matrix(MS_UI, weights_MSD_train_MS)
 load("../output/pred_web_meansquare.Rdata")
 # pred_movie_meansquare <- pred_matrix(movie_UI, weights_MSD_train_Movie)
-load(file = "../output/weights_MSD_train_Movie_pred.RData")
+load(file = "../output/pred_movie_meansquare.RData")
 
-# Predictions
-# pred_movie_simrank <- pred_matrix(movie_UI, weights_usersim_train_Movie)
-load(file = "../output/weights_usersim_train_Movie_pred.RData")
+# SimRank
+# pred_movie_simrank <- pred_matrix(movie_UI[1:1000,1:1000], movie_simrank)
+load(file = "../output/pred_movie_simrank.RData")
 ```
 
 ### Evaluation: Rank Score for MS Data
@@ -141,7 +141,7 @@ rankscore_web_pearson <- rank_scoring(pred_web_pearson, MS_UI_test, 5)
 rankscore_web_spearman <- rank_scoring(pred_web_spearman, MS_UI_test, 5)
 rankscore_web_vector <- rank_scoring(pred_web_vector, MS_UI_test, 5)
 rankscore_web_meansquare <- rank_scoring(pred_web_meansquare, MS_UI_test, 5)
-rankscore_web_simrank <- rank_scoring(xxx, MS_UI_test, 5)
+rankscore_web_simrank <- rank_scoring(pred_movie_simrank, MS_UI_test, 5)
 ```
 
 ### Evaluation: MAE for Movie Data
@@ -159,6 +159,9 @@ mae_movie_vector <- mae(movie_UI_test, pred_movie_vector)
 
 mae_movie_meansquare <- mae(movie_UI_test, pred_movie_meansquare)
 (mae_mov_meansquare <- rowSums(mae_movie_meansquare)/length(mae_movie_meansquare))
+
+mae_movie_simrank <- mae(movie_UI_test, pred_movie_simrank)
+(mae_mov_simrank <- rowSums(mae_movie_simrank)/length(mae_movie_simrank))
 ```
 
 
