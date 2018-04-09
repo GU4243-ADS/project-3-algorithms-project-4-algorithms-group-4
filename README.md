@@ -26,7 +26,7 @@ Term: Spring 2018
 Rank Score| MS | 37.57| 37.57| 37.82|45625.77| 
 MAE|Movie|1.19|1.19| | | 
 Run Time| MS| 0.76H| 0.70H|0.62H|2.7H| 
-| Movie| 1.75H|2.28H|1.5H| | (1000 rows)
+Run Time| Movie| 1.75H|2.28H|1.5H| | (1000 rows)
 
 
 ##### Selecting Neighbors
