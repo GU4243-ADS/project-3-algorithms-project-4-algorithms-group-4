@@ -157,6 +157,106 @@ mae_movie_meansquare <- mae(movie_UI_test, pred_movie_meansquare)
 ## Task: Group 4 Specific Assignment - Neighbors 
 Neighbors: Determine which other users' data to be used in the prediction for a user. There are two methods for finding neighbors, which improve accuracy and computational time, (1) correlation threshold and (2) top \textit{n} neighbors. 
 ```{r}
+load("../output.MS_sim.RData")
+load("../output/movie_sim.RData")
+
+#make some vectors for computational times
+comp_time<-c() #MS topn
+MS_threshold_time<-c() #MS threshold
+
+#do the initial matrix preparation common to both methods of neighborhood selection
+#pred_initial(MS_UI)
+
+
+####method 1:top n neighbors####
+#total number of neighbors
+all_neighb<-nrow(MS_UI)
+#several values of n to try out--10%,30%,50%,and 70% of all neighbors
+n<-c(0.1,0.3,0.5,0.7)
+
+#get the prediction matrices and computational time for different values of n
+comp_time<-c(comp_time, system.time(MS_topn_10percent <- pred_topn(MS_UI, MS_sim, trunc(all_neighb*n[1]))))
+View(MS_topn_10percent)
+save(MS_topn_10percent, file = "MS_topn_10percent.RData")
+
+comp_time<-c(comp_time, system.time(MS_topn_30percent <- pred_topn(MS_UI, MS_sim, trunc(all_neighb*n[2]))))
+save(MS_topn_30percent, file = "MS_topn_30percent.RData")
+
+comp_time<-c(comp_time, system.time(MS_topn_50percent <- pred_topn(MS_UI, MS_sim, trunc(all_neighb*n[3]))))
+save(MS_topn_50percent, file = "MS_topn_50percent.RData")
+
+comp_time<-c(comp_time, system.time(MS_topn_70percent <- pred_topn(MS_UI, MS_sim, trunc(all_neighb*n[4]))))
+save(MS_topn_70percent, file = "MS_topn_70percent.RData")
+
+
+
+####method 2: correlation thresholding####
+#several thresholds to try out
+th<-c(0.2,0.4,0.6,0.8)
+
+#get the prediction matrices and computational time for different thresholds
+MS_threshold_time<-c(MS_threshold_time, system.time(MS_thr_0.2 <- pred_threshold(MS_UI, MS_sim, th[1])))
+save(MS_thr_0.2, file = "MS_thr_0.2.RData")
+
+MS_threshold_time<-c(MS_threshold_time, system.time(MS_thr_0.4 <- pred_threshold(MS_UI, MS_sim, th[2])))
+save(MS_thr_0.4, file = "MS_thr_0.4.RData")
+
+MS_threshold_time<-c(MS_threshold_time, system.time(MS_thr_0.6 <- pred_threshold(MS_UI, MS_sim, th[3])))
+save(MS_thr_0.6, file = "MS_thr_0.6.RData")
+
+MS_threshold_time<-c(MS_threshold_time, system.time(MS_thr_0.8 <- pred_threshold(MS_UI, MS_sim, th[4])))
+save(MS_thr_0.8, file = "MS_thr_0.8.RData")
+
+
+### MOVIE DATA
+#make some vectors to record computational time
+movie_topn_time<-c()
+movie_threshold_time<-c()
+
+
+#do the initial matrix preparation common to both methods of neighborhood selection
+#pred_initial(movie_UI)
+
+####method 1:top n neighbors####
+#total number of neighbors
+all_neighb<-nrow(movie_UI)
+#several values of n to try out--10%,30%,50%,and 70% of all neighbors
+n<-c(0.1,0.3,0.5,0.7)
+
+#get the prediction matrices and computational time for different values of n
+movie_topn_time<-c(movie_topn_time, system.time(movie_topn_10percent <- pred_topn(movie_UI, movie_sim, trunc(all_neighb*n[1]))))
+save(movie_topn_10percent, file = "movie_topn_10percent.RData")
+
+movie_topn_time<-c(movie_topn_time, system.time(movie_topn_30percent <- pred_topn(movie_UI, movie_sim, trunc(all_neighb*n[2]))))
+save(movie_topn_30percent, file = "movie_topn_30percent.RData")
+
+movie_topn_time<-c(movie_topn_time, system.time(movie_topn_50percent <- pred_topn(movie_UI, movie_sim, trunc(all_neighb*n[3]))))
+save(movie_topn_50percent, file = "movie_topn_50percent.RData")
+
+movie_topn_time<-c(movie_topn_time, system.time(movie_topn_70percent <- pred_topn(movie_UI, movie_sim, trunc(all_neighb*n[4]))))
+save(movie_topn_70percent, file = "movie_topn_70percent.RData")
+
+
+
+####method 2: correlation thresholding####
+#several thresholds to try out
+th<-c(0.2,0.4,0.6,0.8)
+
+#get the prediction matrices and computational time for different thresholds
+movie_threshold_time<-c(movie_threshold_time, system.time(movie_thr_0.2 <- pred_threshold(movie_UI, movie_sim, th[1])))
+save(movie_thr_0.2, file = "movie_thr_0.2.RData")
+
+movie_threshold_time<-c(movie_threshold_time, system.time(movie_thr_0.4 <- pred_threshold(movie_UI, movie_sim, th[2])))
+save(movie_thr_0.4, file = "movie_thr_0.4.RData")
+
+
+movie_threshold_time<-c(movie_threshold_time, system.time(movie_thr_0.6 <- pred_threshold(movie_UI, movie_sim, th[3])))
+save(movie_thr_0.6, file = "movie_thr_0.6.RData")
+
+
+movie_threshold_time<-c(movie_threshold_time, system.time(movie_thr_0.8 <- pred_threshold(movie_UI, movie_sim, th[4])))
+save(movie_thr_0.8, file = "movie_thr_0.8.RData")
+
 
 ```
 
