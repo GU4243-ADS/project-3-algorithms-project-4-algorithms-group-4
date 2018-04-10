@@ -410,24 +410,19 @@ rank_scoring <- function(predicted, web_mini_test, alpha){
 ## Mean absolute error (MAE)
 ####################################################
 
-mae <-function(data_test, predictions_test) {
+mae <- function(movie_UI_test,weightpred){
+  ## Calculate Mean Absolute Error
+  ##
+  ## input: movie_UI_test   - movie test data matrix form
+  ##        weightpred - a matrix of similarity weights
+  ##
+  ## output: Mean Absolute Error
+  prediction2<-weightpred[row.names(weightpred)%in%row.names(movie_UI_test),colnames(weightpred)%in%colnames(movie_UI_test)]
   
-  n.items <- dim(data_test)[2]
-  mae <- matrix(NA, nrow = 1, ncol = n.items)
+  mae<-mean(abs(prediction2-movie_UI_test),na.rm = T)
   
-  for (i in 1:n.items){
-    what.to.predict<- which(!is.na(data_test[,i]))
-    
-    predictions <- predictions_test[what.to.predict]
-    test.data <- data_test[what.to.predict]
-    
-    difference <- abs(predictions - test.data)
-    mae[,i] <- sum(difference, na.rm = TRUE)/length(what.to.predict)
-    
-  }
-    return(mae)
+  return(mae)
 }
-
 
 ####################################################
 ## Neighborhood selection with Pearson correlation

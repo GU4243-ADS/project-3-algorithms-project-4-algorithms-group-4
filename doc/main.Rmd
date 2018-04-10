@@ -149,19 +149,15 @@ rankscore_web_simrank <- rank_scoring(pred_movie_simrank, MS_UI_test, 5)
 ```{r}
 # Use the mean absolute error for the predictions on movie data
 mae_movie_pearson <- mae(movie_UI_test, pred_movie_pearson)
-(mae_mov_pearson <- rowSums(mae_movie_pearson)/length(mae_movie_pearson))
 
 mae_movie_spearman <- mae(movie_UI_test, pred_movie_spearman)
-(mae_mov_spearman <- rowSums(mae_movie_spearman)/length(mae_movie_spearman))
 
 mae_movie_vector <- mae(movie_UI_test, pred_movie_vector)
-(mae_mov_vector <- rowSums(mae_movie_vector)/length(mae_movie_vector))
 
 mae_movie_meansquare <- mae(movie_UI_test, pred_movie_meansquare)
-(mae_mov_meansquare <- rowSums(mae_movie_meansquare)/length(mae_movie_meansquare))
 
 mae_movie_simrank <- mae(movie_UI_test, pred_movie_simrank)
-(mae_mov_simrank <- rowSums(mae_movie_simrank)/length(mae_movie_simrank))
+
 ```
 
 
