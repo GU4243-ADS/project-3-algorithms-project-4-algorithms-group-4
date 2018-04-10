@@ -35,9 +35,9 @@ After selecting a neighborhoods, we combine ratings to make a prediction.
 |	| Correlation Threshold | Top-N-Neighbors| Computational Time |
 
 movie data top n neighbors		|movie data thresholding	
-|-|-|-|-|
 ________________________________________________________
-n|	computational time|			threshold	computational time
+n |	computational time |			threshold	computationa l time
+|:---:| :---:| :---:| :---:| :---:|:---:|---
 10%|	 1963.017					| 0.9			| 525.02
 30%|	 2303.331					| 0.7			| 1087.584
 50%|	 2757.009					| 0.5			| 1244.405
@@ -45,8 +45,8 @@ n|	computational time|			threshold	computational time
 					
 					
 MS data top n neighbors				MS data thresholding
-|-|-|-|-|	
 ____________________________________________________
+|:---:| :---:| :---:| :---:| :---:|:---:|---
 n	computational time			threshold	computational time
 10%	| 224.677				| 0.8		| 27.608
 30%	| 275.706				| 0.6		| 77.137
@@ -61,7 +61,7 @@ The EM algorithm uses clusters to predict the ranks within a cluster. For exampl
 
 ##### Results 
 ### Elapsed Time
----> system.time(result <- EM_train(data = data, k = 6, C = 7, ITER = 750))
+
      user    system   elapsed 
 28452.009   875.216 29383.780 ---> 8.162161 hours
 
@@ -71,7 +71,7 @@ The EM algorithm uses clusters to predict the ranks within a cluster. For exampl
 - We suspect the tau had flatlined for a long time
 
 ### Dispersion between clusters (percents):
- ---> colSums(result$hard.assignments)/sum(colSums(result$hard.assignments))*100
+
  [1]  0.09891197  0.00000000  0.01978239 10.28684471  0.05934718
  [6]  0.00000000  0.53412463  0.00000000  0.03956479  0.00000000
 [11] 88.96142433  0.00000000
@@ -79,7 +79,7 @@ The EM algorithm uses clusters to predict the ranks within a cluster. For exampl
 - that is more intuitive, it would be unlikely that all latent groupings were even sized
 
 ### distribution of Mu_c (percent chance):
----> result$mu*100
+
 [1]  8.325108  5.676666  8.031387 13.194455  8.716813  3.106978
  [7] 12.041968  3.526480 10.977759  5.100484 13.848172  7.453731
 - This may mean that even though one group is bigger than the other, a given user has an equal chance of being in any group which mean that the true ?latent? group 11 is just huge. 
