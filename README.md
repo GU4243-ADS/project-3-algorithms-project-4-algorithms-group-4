@@ -36,8 +36,9 @@ After selecting a neighborhoods, we combine ratings to make a prediction.
 
 movie data top n neighbors		|movie data thresholding	
 ________________________________________________________
-n |	computational time |			threshold	computationa l time
-|:---:| :---:| :---:| :---:| :---:|:---:|---
+
+| n |	computational time |	threshold	| computational time |
+|:---:| :---:| :---:| :---
 10%|	 1963.017					| 0.9			| 525.02
 30%|	 2303.331					| 0.7			| 1087.584
 50%|	 2757.009					| 0.5			| 1244.405
@@ -63,9 +64,10 @@ The EM algorithm uses clusters to predict the ranks within a cluster. For exampl
 ### Elapsed Time
 
      user    system   elapsed 
-28452.009   875.216 29383.780 ---> 8.162161 hours
+28452.009   875.216 29383.780 
+---> 8.162161 hours
 
-### total iterations: 750
+### Total iterations: 750
 
 ### Final tau (L-2 norm of difference): 0.0115
 - We suspect the tau had flatlined for a long time
@@ -82,7 +84,7 @@ The EM algorithm uses clusters to predict the ranks within a cluster. For exampl
 
 [1]  8.325108  5.676666  8.031387 13.194455  8.716813  3.106978
  [7] 12.041968  3.526480 10.977759  5.100484 13.848172  7.453731
-- This may mean that even though one group is bigger than the other, a given user has an equal chance of being in any group which mean that the true ?latent? group 11 is just huge. 
+- This may mean that even though one group is bigger than the other, a given user has an equal chance of being in any group which mean that the true latent group 11 is just huge. 
 
 ### Test Error
 MAE -> 1.111207
