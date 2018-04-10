@@ -57,13 +57,13 @@ ________________________________________________________
 ### Model-based Algorithm
 
 ##### Description
-The EM algorithm uses clusters to predict the ranks within a cluster. For example, can we group users who rate some movies similarily into a single cluster and predict the outcome of that cluster? Unlike the memory-based approach, the model-based approach is less computationally taxing as one only needs to store the cluster information rather than entire dataset. 
+The EM algorithm uses clusters to predict the ranks within a cluster. For example, can we group users who rate some movies similarly into a single cluster and predict the outcome of that cluster? Unlike the memory-based approach, the model-based approach is less computationally taxing as one only needs to store the cluster information rather than entire dataset. 
 
 ##### Results 
 ### Elapsed Time
 
      user    system   elapsed 
-28452.009   875.216 29383.780 
+28452.009 |  875.216  | 29383.780 
 ---> 8.162161 hours
 
 ### Total iterations: 750
