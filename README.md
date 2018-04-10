@@ -33,26 +33,64 @@ Run Time| Movie| 1.75H|2.28H|1.5H|1.5H (1000rows)|8.5H
 ##### Selecting Neighbors
 After selecting a neighborhoods, we combine ratings to make a prediction. 
 |	| Correlation Threshold | Top-N-Neighbors| Computational Time |
---- | :---: |	:---: | ---
-10%| 	|	| 33 minutes
-30% | 	|	| 38 minutes
-50% |	|	| 43 minutes
-70% |	|	| 53 minutes
+
+movie data top n neighbors		|movie data thresholding	
+|-|-|-|-|
+________________________________________________________
+n|	computational time|			threshold	computational time
+10%|	 1963.017					| 0.9			| 525.02
+30%|	 2303.331					| 0.7			| 1087.584
+50%|	 2757.009					| 0.5			| 1244.405
+70%| 3178.991					| 0.2			| 2296.728
+					
+					
+MS data top n neighbors				MS data thresholding
+|-|-|-|-|	
+____________________________________________________
+n	computational time			threshold	computational time
+10%	| 224.677				| 0.8		| 27.608
+30%	| 275.706				| 0.6		| 77.137
+50%	| 302.482				| 0.4		| 113.58
+70%	| 350.525				| 0.2		| 212.585
 
 
-#### Model-based Algorithm
+### Model-based Algorithm
 
 ##### Description
 The EM algorithm uses clusters to predict the ranks within a cluster. For example, can we group users who rate some movies similarily into a single cluster and predict the outcome of that cluster? Unlike the memory-based approach, the model-based approach is less computationally taxing as one only needs to store the cluster information rather than entire dataset. 
 
 ##### Results 
-|	| Test Error  | Computational Time |
- ---|:---: | ---
-| Movie | (MAE)	| |
-| website | (Rank score)| | 
+### Elapsed Time
+---> system.time(result <- EM_train(data = data, k = 6, C = 7, ITER = 750))
+     user    system   elapsed 
+28452.009   875.216 29383.780 ---> 8.162161 hours
+
+### total iterations: 750
+
+### Final tau (L-2 norm of difference): 0.0115
+- We suspect the tau had flatlined for a long time
+
+### Dispersion between clusters (percents):
+ ---> colSums(result$hard.assignments)/sum(colSums(result$hard.assignments))*100
+ [1]  0.09891197  0.00000000  0.01978239 10.28684471  0.05934718
+ [6]  0.00000000  0.53412463  0.00000000  0.03956479  0.00000000
+[11] 88.96142433  0.00000000
+- 88% in group 11 which is interesting because in 3 iterations we had 64% in cluster 8 
+- that is more intuitive, it would be unlikely that all latent groupings were even sized
+
+### distribution of Mu_c (percent chance):
+---> result$mu*100
+[1]  8.325108  5.676666  8.031387 13.194455  8.716813  3.106978
+ [7] 12.041968  3.526480 10.977759  5.100484 13.848172  7.453731
+- This may mean that even though one group is bigger than the other, a given user has an equal chance of being in any group which mean that the true ?latent? group 11 is just huge. 
+
+### Test Error
+MAE -> 1.111207
+
+Further results and graphs will be in our in class presentation.
 
 
-Contribution statement: Mingyue and Yun completed the memory model and wrote the ranking score evaluation. More specifcally, Yun developed Mean-square similarity and Simrank while Mingyue developed Pearson Correlation, Spearman Correlation and Vector Similarity. Mingyue and Yun generated predictions and evaluations of these five similarity weights. Judy did the neighborhood selection model on Pearson correlations. Noah and Nicole worked on the EM algorithm. More specifically, Nicole and Noah tag-teamed the E-step and the Bayesian prediction function. Noah wrote the M-step and Nicole worked on the mean absolute error. Nicole annotated the main.Rmd and the readme files on Github. Yun made the powerpoint presentation. All team members contributed to the GitHub repository and prepared the presentation. All team members approve our work presented in our GitHub repository including this contribution statement.
+**Contribution statement**: Mingyue and Yun completed the memory model and wrote the ranking score evaluation. More specifcally, Yun developed Mean-square similarity and Simrank while Mingyue developed Pearson Correlation, Spearman Correlation and Vector Similarity. Mingyue and Yun generated predictions and evaluations of these five similarity weights. Judy did the neighborhood selection model on Pearson correlations. Noah and Nicole worked on the EM algorithm. More specifically, Nicole and Noah tag-teamed the E-step and the Bayesian prediction function. Noah wrote the M-step and Nicole worked on the mean absolute error. Nicole annotated the main.Rmd and the readme files on Github. Yun made the powerpoint presentation. All team members contributed to the GitHub repository and prepared the presentation. All team members approve our work presented in our GitHub repository including this contribution statement.
 
 #### References 
 
