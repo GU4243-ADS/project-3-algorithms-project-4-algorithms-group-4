@@ -30,14 +30,14 @@ Run Time| MS| 0.76H| 0.70H|0.62H|2.7H|N/A
 Run Time| Movie| 1.75H|2.28H|1.5H|1.5H (1000rows)|8.5H
 
 
-##### Selecting Neighbors
+#### Selecting Neighbors
 After selecting a neighborhoods, we combine ratings to make a prediction. 
 |	| Correlation Threshold | Top-N-Neighbors| Computational Time |
 
-movie data top n neighbors		|movie data thresholding	
+#### movie data 
 ________________________________________________________
 
-| n |	computational time |	threshold	| computational time |
+| top n |	computational time |	threshold	| computational time |
 |:---:| :---:| :---:| :---
 10%|	 1963.017					| 0.9			| 525.02
 30%|	 2303.331					| 0.7			| 1087.584
@@ -45,10 +45,9 @@ ________________________________________________________
 70%| 3178.991					| 0.2			| 2296.728
 					
 					
-MS data top n neighbors				MS data thresholding
-____________________________________________________
-|:---:| :---:| :---:| :---:| :---:|:---:|---
-n	computational time			threshold	computational time
+#### MS data ____________________________________________________
+|:---:| :---:| :---:| :---:
+|top n | computational time | threshold | computational time |
 10%	| 224.677				| 0.8		| 27.608
 30%	| 275.706				| 0.6		| 77.137
 50%	| 302.482				| 0.4		| 113.58
